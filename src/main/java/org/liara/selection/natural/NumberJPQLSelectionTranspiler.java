@@ -1,6 +1,30 @@
+/*
+ * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ *
+ * Permission is hereby granted,  free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction,  including without limitation the rights
+ * to use,  copy, modify, merge,  publish,  distribute, sublicense,  and/or sell
+ * copies  of the  Software, and  to  permit persons  to  whom  the  Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The  above  copyright  notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE  SOFTWARE IS  PROVIDED  "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED,  INCLUDING  BUT  NOT LIMITED  TO THE  WARRANTIES  OF MERCHANTABILITY,
+ * FITNESS  FOR  A PARTICULAR  PURPOSE  AND  NONINFRINGEMENT. IN NO  EVENT SHALL
+ * THE  AUTHORS OR  COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES  OR
+ * OTHER  LIABILITY, WHETHER  IN  AN  ACTION  OF  CONTRACT,  TORT  OR  OTHERWISE,
+ * ARISING  FROM,  OUT  OF OR  IN  CONNECTION  WITH THE  SOFTWARE OR  THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package org.liara.selection.natural;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.liara.selection.Utils;
@@ -12,11 +36,9 @@ import org.liara.selection.jpql.JPQLQuery;
 import org.liara.selection.jpql.JPQLQueryBuilder;
 import org.liara.selection.jpql.JPQLSelectionTranspiler;
 
-import java.nio.CharBuffer;
-
 public abstract class   NumberJPQLSelectionTranspiler<Value extends Comparable<Value>>
-                extends NumberSelectionBaseListener
-                implements JPQLSelectionTranspiler
+  extends NumberSelectionBaseListener
+  implements JPQLSelectionTranspiler
 {
   @NonNull
   private final JPQLClauseBuilder _currentClause;
@@ -58,8 +80,8 @@ public abstract class   NumberJPQLSelectionTranspiler<Value extends Comparable<V
   public void exitNear (
     final NumberSelectionParser.@NonNull NearContext context
   ) {
-    @NonNull final Value             delta         = parse(context.delta);
-    @NonNull final Value             target        = parse(context.target);
+    @NonNull final Value delta  = parse(context.delta);
+    @NonNull final Value target = parse(context.target);
 
     _currentClause.appendSelf();
     _currentClause.appendLiteral("BETWEEN");
@@ -73,7 +95,7 @@ public abstract class   NumberJPQLSelectionTranspiler<Value extends Comparable<V
     final NumberSelectionParser.@NonNull OperationContext context
   ) {
     @NonNull final String operator;
-    final int operatorType = (context.name == null) ? NumberSelectionLexer.EQUAL : context.name.getType();
+    final int             operatorType = (context.name == null) ? NumberSelectionLexer.EQUAL : context.name.getType();
 
     _currentClause.appendSelf();
 
@@ -93,7 +115,7 @@ public abstract class   NumberJPQLSelectionTranspiler<Value extends Comparable<V
   public void exitRange (
     final NumberSelectionParser.@NonNull RangeContext context
   ) {
-    @NonNull final Value left = parse(context.left);
+    @NonNull final Value left  = parse(context.left);
     @NonNull final Value right = parse(context.right);
 
     _currentClause.appendSelf();
@@ -104,13 +126,9 @@ public abstract class   NumberJPQLSelectionTranspiler<Value extends Comparable<V
   }
 
   public @NonNull JPQLQuery transpile (@NonNull final CharSequence expression) {
-    @NonNull final NumberSelectionLexer lexer = new NumberSelectionLexer(
-      CharStreams.fromString(expression.toString())
-    );
+    @NonNull final NumberSelectionLexer lexer = new NumberSelectionLexer(CharStreams.fromString(expression.toString()));
 
-    @NonNull final NumberSelectionParser parser = new NumberSelectionParser(
-      new CommonTokenStream(lexer)
-    );
+    @NonNull final NumberSelectionParser parser = new NumberSelectionParser(new CommonTokenStream(lexer));
 
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 

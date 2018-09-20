@@ -1,17 +1,42 @@
+/*
+ * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ *
+ * Permission is hereby granted,  free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction,  including without limitation the rights
+ * to use,  copy, modify, merge,  publish,  distribute, sublicense,  and/or sell
+ * copies  of the  Software, and  to  permit persons  to  whom  the  Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The  above  copyright  notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE  SOFTWARE IS  PROVIDED  "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED,  INCLUDING  BUT  NOT LIMITED  TO THE  WARRANTIES  OF MERCHANTABILITY,
+ * FITNESS  FOR  A PARTICULAR  PURPOSE  AND  NONINFRINGEMENT. IN NO  EVENT SHALL
+ * THE  AUTHORS OR  COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES  OR
+ * OTHER  LIABILITY, WHETHER  IN  AN  ACTION  OF  CONTRACT,  TORT  OR  OTHERWISE,
+ * ARISING  FROM,  OUT  OF OR  IN  CONNECTION  WITH THE  SOFTWARE OR  THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package org.liara.selection.string;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.liara.selection.antlr.*;
+import org.liara.selection.antlr.StringSelectionBaseListener;
+import org.liara.selection.antlr.StringSelectionLexer;
+import org.liara.selection.antlr.StringSelectionParser;
 import org.liara.selection.jpql.JPQLClauseBuilder;
 import org.liara.selection.jpql.JPQLQuery;
 import org.liara.selection.jpql.JPQLQueryBuilder;
 import org.liara.selection.jpql.JPQLSelectionTranspiler;
 
 public class StringJPQLSelectionTranspiler
-       extends StringSelectionBaseListener
-       implements JPQLSelectionTranspiler
+  extends StringSelectionBaseListener
+  implements JPQLSelectionTranspiler
 {
   @NonNull
   private final JPQLClauseBuilder _currentClause;
@@ -93,13 +118,9 @@ public class StringJPQLSelectionTranspiler
   }
 
   public @NonNull JPQLQuery transpile (@NonNull final CharSequence expression) {
-    @NonNull final StringSelectionLexer lexer = new StringSelectionLexer(
-      CharStreams.fromString(expression.toString())
-    );
+    @NonNull final StringSelectionLexer lexer = new StringSelectionLexer(CharStreams.fromString(expression.toString()));
 
-    @NonNull final StringSelectionParser parser = new StringSelectionParser(
-      new CommonTokenStream(lexer)
-    );
+    @NonNull final StringSelectionParser parser = new StringSelectionParser(new CommonTokenStream(lexer));
 
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 
