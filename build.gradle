@@ -1,0 +1,48 @@
+plugins {
+  id 'antlr'
+  id 'jacoco'
+  id 'java-library'
+  id 'groovy'
+  id 'idea'
+  id 'eclipse'
+}
+
+group 'org.liara'
+version '0.1-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+  jcenter()
+}
+
+defaultTasks 'clean', 'generateGrammarSource', 'test', 'build'
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+generateGrammarSource {
+  mkdir "${project.rootDir}/src/main/java/org/liara/selection/antlr"
+  outputDirectory file("${project.rootDir}/src/main/java/org/liara/selection/antlr")
+  arguments += ["-package", 'org.liara.selection.antlr']
+}
+
+dependencies {
+  antlr "org.antlr:antlr4:4.7.1"
+
+  implementation group: 'org.checkerframework', name: 'checker', version: '2.5.4'
+  implementation group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+
+  testImplementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.15'
+  testImplementation group: 'org.spockframework', name: 'spock-core', version: '1.1-groovy-2.4'
+  testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.20.1'
+}
+
+jacoco {
+  toolVersion = "0.8.2"
+}
+
+jacocoTestReport {
+  reports {
+    html.destination file('${buildDir}/reports/coverage')
+  }
+}
