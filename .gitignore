@@ -1,0 +1,12 @@
+.gradle
+.vscode
+.settings
+.idea
+*.ipr
+*.iws
+*.iml
+out
+classes
+build
+.project
+src/main/java/org/liara/selection/antlr
