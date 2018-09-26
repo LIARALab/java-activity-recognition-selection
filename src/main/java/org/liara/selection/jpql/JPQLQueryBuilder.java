@@ -92,7 +92,7 @@ public class JPQLQueryBuilder
   public @NonNull JPQLQuery build () {
     @NonNull final String selection = _selection.toString();
 
-    if (selection.contains("OR")) {
+    if (selection.contains(" OR ")) {
       return new JPQLQuery("(" + selection + ")", _parameters);
     } else {
       return new JPQLQuery(selection, _parameters);

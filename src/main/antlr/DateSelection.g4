@@ -16,7 +16,7 @@ TOKEN: '(' ('\')\'' | '\\)' |~')')* ')';
 
 selection: (defaultConfiguration ';')? filter (';' filter)* EOF;
 
-defaultConfiguration: locale format? | format locale?;
+defaultConfiguration: DEFAULT (locale format? | format locale?);
 
 filter: clause (',' clause)*;
 

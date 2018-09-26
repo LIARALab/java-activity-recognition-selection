@@ -22,276 +22,225 @@
 
 package org.liara.selection.datetime
 
-import org.liara.selection.duration.DurationJPQLSelectionTranspiler
 import org.liara.selection.jpql.JPQLQuery
 import spock.lang.Specification
-
-import java.time.Duration
 
 class DatetimeJPQLSelectionTranspilerSpecification
   extends Specification {
 
   def "it can transpile greater than clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
     when: "we try to transpile a greater than clause"
-    final JPQLQuery result = transpiler.transpile("gt:1year+2day-3minutes")
+    final JPQLQuery result = transpiler.transpile("gt:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the greater than clause"
     result.clause == "(:this > :clause_0_value)"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(365).plusDays(2).minusMinutes(3).toMillis()
+      "clause_0_value": '2018-12-10T15:20:30+01:00'
     ]
   }
 
   def "it can transpile greater than or equal clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
     when: "we try to transpile a greater than or equal clause"
-    final JPQLQuery result = transpiler.transpile("gte:1year+2day-3minutes")
+    final JPQLQuery result = transpiler.transpile("gte:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the greater than or equal clause"
     result.clause == "(:this >= :clause_0_value)"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(365).plusDays(2).minusMinutes(3).toMillis()
+      "clause_0_value": '2018-12-10T15:20:30+01:00'
     ]
   }
 
   def "it can transpile less than clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
     when: "we try to transpile a less than clause"
-    final JPQLQuery result = transpiler.transpile("lt:1year+2day-3minutes")
+    final JPQLQuery result = transpiler.transpile("lt:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the less than clause"
     result.clause == "(:this < :clause_0_value)"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(365).plusDays(2).minusMinutes(3).toMillis()
+      "clause_0_value": '2018-12-10T15:20:30+01:00'
     ]
   }
 
   def "it can transpile less than or equal clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
     when: "we try to transpile a less than or equal clause"
-    final JPQLQuery result = transpiler.transpile("lte:1year+2day-3minutes")
+    final JPQLQuery result = transpiler.transpile("lte:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the less than or equal clause"
     result.clause == "(:this <= :clause_0_value)"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(365).plusDays(2).minusMinutes(3).toMillis()
+      "clause_0_value": '2018-12-10T15:20:30+01:00'
     ]
   }
 
   def "it can transpile equal clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
     when: "we try to transpile an equal clause"
     final JPQLQuery[] results = [
-      transpiler.transpile("1year+2day-3minutes"),
-      transpiler.transpile("eq:1year+2day-3minutes")
+      transpiler.transpile("eq:(2018-12-10T15:20:30+01:00[Europe/Paris])"),
+      transpiler.transpile("(2018-12-10T15:20:30+01:00[Europe/Paris])")
     ] as JPQLQuery[]
 
-    then: " we expect the transpiler to be able to transpile the less than or equal clause"
+    then: " we expect the transpiler to be able to transpile the equal clause"
     for (final JPQLQuery result : results) {
-      result.clause == "(:this <= :clause_0_value)"
+      result.clause == "(:this = :clause_0_value)"
       result.parameters == [
-        "clause_0_value": Duration.ofDays(365).plusDays(2).minusMinutes(3).toMillis()
+        "clause_0_value": '2018-12-10T15:20:30+01:00'
       ]
     }
   }
 
   def "it can transpile range clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
     when: "we try to transpile a range clause"
     final JPQLQuery[] results = [
-      transpiler.transpile("1years5days:2years"),
-      transpiler.transpile("2years:1years5days"),
-      transpiler.transpile("1years5days:and:2years"),
-      transpiler.transpile("2years:and:1years5days")
+      transpiler.transpile(
+        "(2018-12-16T18:10:20+01:00[Europe/Paris]):(2018-12-10T15:20:30+01:00[Europe/Paris])"
+      ),
+      transpiler.transpile(
+        "(2018-12-10T15:20:30+01:00[Europe/Paris]):(2018-12-16T18:10:20+01:00[Europe/Paris])"
+      )
     ] as JPQLQuery[]
 
     then: " we expect the transpiler to be able to transpile the range clause"
     for (final JPQLQuery result : results) {
       result.clause == "(:this BETWEEN :clause_0_min AND :clause_0_max)"
       result.parameters == [
-        "clause_0_min": Duration.ofDays(365).plusDays(5).toMillis(),
-        "clause_0_max": Duration.ofDays(365 * 2).toMillis()
+        "clause_0_min": '2018-12-10T15:20:30+01:00',
+        "clause_0_max": '2018-12-16T18:10:20+01:00'
       ]
     }
   }
 
-  def "it can transpile near clauses" () {
+  def "it can transpile negation of clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile a near clause"
+    when: "we try to transpile a less than or equal clause"
     final JPQLQuery[] results = [
-      transpiler.transpile("near:5days+-2hours"),
-      transpiler.transpile("near:5days:delta:2hours"),
-      transpiler.transpile("near:5days:dt:2hours")
+      transpiler.transpile("not:eq:(2018-12-10T15:20:30+01:00[Europe/Paris])"),
+      transpiler.transpile("not:(2018-12-16T18:10:20+01:00[Europe/Paris]):(2018-12-10T15:20:30+01:00[Europe/Paris])")
     ] as JPQLQuery[]
 
-    then: " we expect the transpiler to be able to transpile the near clause"
-    for (final JPQLQuery result : results) {
-      result.clause == "(:this BETWEEN :clause_0_min AND :clause_0_max)"
-      result.parameters == [
-        "clause_0_min": Duration.ofDays(5).plusHours(2).toMillis(),
-        "clause_0_max": Duration.ofDays(5).minusHours(2).toMillis()
-      ]
-    }
-  }
-
-  def "it can transpile negated clauses" () {
-    given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
-
-    when: "we try to transpile a negated clause"
-    final JPQLQuery result = transpiler.transpile("not:near:5days+-2hours")
-
-    then: " we expect the transpiler to be able to transpile the near clause"
-    result.clause == "(NOT (:this BETWEEN :clause_0_min AND :clause_0_max))"
-    result.parameters == [
-      "clause_0_min": Duration.ofDays(5).minusHours(2).toMillis(),
-      "clause_0_max": Duration.ofDays(5).plusHours(2).toMillis()
+    then: " we expect the transpiler to be able to transpile the less than or equal clause"
+    results[0].clause == "(NOT (:this = :clause_0_value))"
+    results[0].parameters == [
+      "clause_0_value": '2018-12-10T15:20:30+01:00'
+    ]
+    results[1].clause == "(NOT (:this BETWEEN :clause_0_min AND :clause_0_max))"
+    results[1].parameters == [
+      "clause_0_min": '2018-12-10T15:20:30+01:00',
+      "clause_0_max": '2018-12-16T18:10:20+01:00'
     ]
   }
 
   def "it can transpile conjunction of clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile a conjunction of clause"
-    final JPQLQuery result = transpiler.transpile("gt:5days,lte:3years,not:10days:20days")
-
-    then: " we expect the transpiler to be able to transpile the conjunction of clauses"
-    result.clause == String.join(
-      "",
-      "(:this > :clause_0_value AND ",
-      ":this <= :clause_1_value AND ",
-      "NOT (:this BETWEEN :clause_2_min AND :clause_2_max))"
+    when: "we try to transpile a conjunction of clauses"
+    final JPQLQuery result = transpiler.transpile(
+      "not:eq:(2018-12-10T15:20:30+01:00[Europe/Paris]),lt:(2018-12-20T15:20:30+01:00[Europe/Paris])," +
+        "gt:(2018-12-03T15:20:30+01:00[Europe/Paris])"
     )
 
+    then: "we expect the transpiler to be able to transpile the conjunction of clauses"
+    result.clause == "(NOT (:this = :clause_0_value) AND :this < :clause_1_value AND :this > :clause_2_value)"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(5).toMillis(),
-      "clause_1_value": Duration.ofDays(365 * 3).toMillis(),
-      "clause_2_min": Duration.ofDays(10).toMillis(),
-      "clause_2_max": Duration.ofDays(20).toMillis()
+      "clause_0_value": '2018-12-10T15:20:30+01:00',
+      "clause_1_value": '2018-12-20T15:20:30+01:00',
+      "clause_2_value": '2018-12-03T15:20:30+01:00'
     ]
   }
 
-  def "it can transpile disjunction of conjunctions" () {
+  def "it can transpile disjunction of clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile a disjunction of conjunctions"
-    final JPQLQuery result = transpiler.transpile("gt:5days;lte:3years,not:10days:20days;10years")
-
-    then: " we expect the transpiler to be able to transpile the disjunction of conjunctions"
-    result.clause == String.join(
-      "",
-      "((:this > :clause_0_value) OR ",
-      "(:this <= :clause_1_value AND ",
-      "NOT (:this BETWEEN :clause_2_min AND :clause_2_max)) OR ",
-      "(:this = :clause_3_value))"
+    when: "we try to transpile a disjunction of clauses"
+    final JPQLQuery result = transpiler.transpile(
+      "not:eq:(2018-12-10T15:20:30+01:00[Europe/Paris]),lt:(2018-12-20T15:20:30+01:00[Europe/Paris]);" +
+        "gt:(2018-12-03T15:20:30+01:00[Europe/Paris])"
     )
 
+    then: "we expect the transpiler to be able to transpile the disjunction of clauses"
+    result.clause == "((NOT (:this = :clause_0_value) AND :this < :clause_1_value) OR (:this > :clause_2_value))"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(5).toMillis(),
-      "clause_1_value": Duration.ofDays(365 * 3).toMillis(),
-      "clause_2_min": Duration.ofDays(10).toMillis(),
-      "clause_2_max": Duration.ofDays(20).toMillis(),
-      "clause_3_value": Duration.ofDays(365 * 10).toMillis()
+      "clause_0_value": '2018-12-10T15:20:30+01:00',
+      "clause_1_value": '2018-12-20T15:20:30+01:00',
+      "clause_2_value": '2018-12-03T15:20:30+01:00'
     ]
   }
 
-  def "it can transpile durations" () {
+  def "it can transpile datetime" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile durations"
-    final Map<Duration, JPQLQuery[]> results = [
-      (Duration.ofDays(129 * 365)): [
-        transpiler.transpile("129year"),
-        transpiler.transpile("129years"),
-        transpiler.transpile("129y")
-      ] as JPQLQuery[],
-      (Duration.ofDays(382 * 30)): [
-        transpiler.transpile("382month"),
-        transpiler.transpile("382months"),
-        transpiler.transpile("382M")
-      ] as JPQLQuery[],
-      (Duration.ofDays(281 * 7)): [
-        transpiler.transpile("281weeks"),
-        transpiler.transpile("281week"),
-        transpiler.transpile("281w")
-      ] as JPQLQuery[],
-      (Duration.ofDays(136)): [
-        transpiler.transpile("136days"),
-        transpiler.transpile("136day"),
-        transpiler.transpile("136d")
-      ] as JPQLQuery[],
-      (Duration.ofHours(249)): [
-        transpiler.transpile("249hours"),
-        transpiler.transpile("249hour"),
-        transpiler.transpile("249h")
-      ] as JPQLQuery[],
-      (Duration.ofMinutes(123)): [
-        transpiler.transpile("123minutes"),
-        transpiler.transpile("123minute"),
-        transpiler.transpile("123m")
-      ] as JPQLQuery[],
-      (Duration.ofSeconds(456)): [
-        transpiler.transpile("456seconds"),
-        transpiler.transpile("456second"),
-        transpiler.transpile("456s")
-      ] as JPQLQuery[],
-      (Duration.ofMillis(3149)): [
-        transpiler.transpile("3149milliseconds"),
-        transpiler.transpile("3149millisecond"),
-        transpiler.transpile("3149ms")
-      ] as JPQLQuery[]
+    when: "we try to transpile a datetime"
+    final JPQLQuery result = transpiler.transpile("(2018-12-10T15:20:30+01:00[Europe/Paris])")
+
+    then: "we expect the transpiler to be able to transpile the datetime"
+    result.clause == "(:this = :clause_0_value)"
+    result.parameters == [
+      "clause_0_value": '2018-12-10T15:20:30+01:00'
     ]
-
-    then: " we expect the transpiler to be able to transpile durarions"
-    for (final Map.Entry<Duration, JPQLQuery[]> entry : results.entrySet()) {
-      for (final JPQLQuery resultQuery : entry.value) {
-        resultQuery.parameters['clause_0_value'] == entry.key.toMillis()
-      }
-    }
   }
 
-  def "it can transpile complex durations" () {
+  def "it can transpile date" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile complex durations"
-    final JPQLQuery result = transpiler.transpile("1month-20day3d+3hours-1year+6349874698hours")
+    when: "we try to transpile a date"
+    final JPQLQuery result = transpiler.transpile("format:(yyyy-MM-dd)(2018-12-10)")
 
-    then: " we expect the transpiler to be able to transpile complex durarions"
-    result.parameters['clause_0_value'] == Duration.ofDays(1 * 30)
-                                                   .minusDays(20)
-                                                   .plusDays(3)
-                                                   .plusHours(3)
-                                                   .minusDays(365)
-                                                   .plusHours(6349874698).toMillis()
+    then: "we expect the transpiler to be able to transpile the date"
+    result.clause == "(DATE_FORMAT(:this, '%Y-%m-%d') = :clause_0_value)"
+    result.parameters == [
+      "clause_0_value": '2018-12-10'
+    ]
   }
 
-  def "it throw an error if you use an invalid long value before a duration type" () {
+  def "it can transpile time" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile a duration with an invalid long"
-    final JPQLQuery result = transpiler.transpile("15489789465135668798731687984649846535498765months")
+    when: "we try to transpile a time"
+    final JPQLQuery result = transpiler.transpile("format:(HH:mm:ss)(15:20:30)")
 
-    then: " we expect the transpiler to throw an error"
-    thrown(Error.class)
+    then: "we expect the transpiler to be able to transpile the time"
+    result.clause == "(DATE_FORMAT(:this, '%H:%i:%s.%f') = :clause_0_value)"
+    result.parameters == [
+      "clause_0_value": '15:20:30'
+    ]
+  }
+
+  def "it can transpile fully custom formats" () {
+    given: "a transpiler"
+    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+
+    when: "we try to transpile a time"
+    final JPQLQuery result = transpiler.transpile("locale:(en)format:(EEEE HH'h')(Monday 15h)")
+
+    then: "we expect the transpiler to be able to transpile the time"
+    result.clause == "(HOUR(:this) = :clause_0_value_hourofday AND DAYOFWEEK(:this) = :clause_0_value_dayofweek)"
+    result.parameters == [
+      "clause_0_value_dayofweek": 1,
+      "clause_0_value_hourofday": 15
+    ]
   }
 }
