@@ -229,14 +229,14 @@ class DatetimeJPQLSelectionTranspilerSpecification
     ]
   }
 
-  def "it can transpile fully custom formats" () {
+  def "it can transpile fully custom format" () {
     given: "a transpiler"
     final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
 
-    when: "we try to transpile a time"
+    when: "we try to transpile a fully custom format"
     final JPQLQuery result = transpiler.transpile("locale:(en)format:(EEEE HH'h')(Monday 15h)")
 
-    then: "we expect the transpiler to be able to transpile the time"
+    then: "we expect the transpiler to be able to transpile the fully custom format"
     result.clause == "(HOUR(:this) = :clause_0_value_hourofday AND DAYOFWEEK(:this) = :clause_0_value_dayofweek)"
     result.parameters == [
       "clause_0_value_dayofweek": 1,

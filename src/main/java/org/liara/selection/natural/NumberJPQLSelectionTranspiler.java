@@ -36,7 +36,7 @@ import org.liara.selection.jpql.JPQLQuery;
 import org.liara.selection.jpql.JPQLQueryBuilder;
 import org.liara.selection.jpql.JPQLSelectionTranspiler;
 
-public abstract class   NumberJPQLSelectionTranspiler<Value extends Comparable<Value>>
+public abstract class NumberJPQLSelectionTranspiler<Value extends Comparable<Value>>
   extends NumberSelectionBaseListener
   implements JPQLSelectionTranspiler
 {

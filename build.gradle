@@ -25,22 +25,64 @@ plugins {
   id 'jacoco'
   id 'java-library'
   id 'groovy'
+  id 'maven-publish'
   id 'idea'
   id 'eclipse'
 }
-
-group 'org.liara'
-version '0.1-SNAPSHOT'
 
 repositories {
   mavenCentral()
   jcenter()
 }
 
-defaultTasks 'clean', 'generateGrammarSource', 'test', 'build'
+defaultTasks 'clean', 'generateGrammarSource', 'test', 'build', 'publishToMavenLocal'
 
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
+
+publishing {
+  publications {
+    library(MavenPublication) {
+      groupId = 'org.liara'
+      artifactId = 'selection'
+      version = '0.1-SNAPSHOT'
+
+      from components.java
+
+      /*
+      pom {
+        name = 'LIARA - REST Selection'
+        description = 'A Java library for transpiling REST selection into JPQL queries.'
+        url = 'https://github.com/LIARALab/java-rest-collection'
+        licenses {
+          license {
+            name = 'MIT'
+            url = 'https://opensource.org/licenses/MIT'
+          }
+        }
+        developers {
+          developer {
+            id = 'cedric-demongivert'
+            name = 'Cédric DEMONGIVERT'
+            email = 'cedric.demongivert@gmail.com'
+          }
+        }
+        scm {
+          connection = 'scm:git:git://github.com/LIARALab/java-rest-collection.git'
+          url = 'https://github.com/LIARALab/java-rest-collection'
+        }
+      }
+      */
+    }
+  }
+
+  repositories {
+    maven {
+      url = version.endsWith('SNAPSHOT') ? "$buildDir/repos/snapshots"
+        : "$buildDir/repos/releases"
+    }
+  }
+}
 
 generateGrammarSource {
   mkdir "${project.rootDir}/src/main/java/org/liara/selection/antlr"

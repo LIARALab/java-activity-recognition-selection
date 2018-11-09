@@ -23,6 +23,8 @@
 package org.liara.selection;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.selection.datetime.DateTimeInRangeJPQLSelectionTranspiler;
+import org.liara.selection.datetime.DateTimeJPQLSelectionTranspiler;
 import org.liara.selection.duration.DurationJPQLSelectionTranspiler;
 import org.liara.selection.jpql.JPQLSelectionTranspiler;
 import org.liara.selection.natural.*;
@@ -68,5 +70,13 @@ public final class JPQLSelection
 
   public static @NonNull JPQLSelectionTranspiler durationTranspiler () {
     return new DurationJPQLSelectionTranspiler();
+  }
+
+  public static @NonNull JPQLSelectionTranspiler datetimeTranspiler () {
+    return new DateTimeJPQLSelectionTranspiler();
+  }
+
+  public static @NonNull JPQLSelectionTranspiler datetimeInRangeTranspiler () {
+    return new DateTimeInRangeJPQLSelectionTranspiler();
   }
 }
