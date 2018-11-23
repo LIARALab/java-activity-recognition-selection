@@ -26,6 +26,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.selection.ThrowingErrorListener;
+import org.liara.selection.TranspilationException;
 import org.liara.selection.Utils;
 import org.liara.selection.antlr.DurationSelectionBaseListener;
 import org.liara.selection.antlr.DurationSelectionLexer;
@@ -241,10 +243,21 @@ public class DurationJPQLSelectionTranspiler
 
     @NonNull final DurationSelectionParser parser = new DurationSelectionParser(new CommonTokenStream(lexer));
 
-    ParseTreeWalker.DEFAULT.walk(
-      this,
-      parser.selection()
-    );
+    ParseTreeWalker.DEFAULT.walk(this, parser.selection());
+
+    return _currentSelection.build();
+  }
+
+  public @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
+  throws TranspilationException
+  {
+    @NonNull final DurationSelectionLexer lexer =
+      new DurationSelectionLexer(CharStreams.fromString(expression.toString()));
+    lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+    @NonNull final DurationSelectionParser parser = new DurationSelectionParser(new CommonTokenStream(lexer));
+    parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+
+    ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 
     return _currentSelection.build();
   }

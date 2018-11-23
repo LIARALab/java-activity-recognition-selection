@@ -20,17 +20,42 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.liara.selection.jpql;
+package org.liara.selection;
 
-import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.liara.selection.TranspilationException;
 
-public interface JPQLSelectionTranspiler
-  extends ParseTreeListener
+public class TranspilationException
+  extends Error
 {
-  @NonNull JPQLQuery transpile (@NonNull final CharSequence expression);
+  @NonNull
+  private final int _line;
 
-  @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
-  throws TranspilationException;
+  @NonNull
+  private final int _character;
+
+  public TranspilationException (
+    final int line, final int character, @NonNull final String message
+  )
+  {
+    super(message);
+    _line = line;
+    _character = character;
+  }
+
+  public TranspilationException (
+    final int line, final int character, @NonNull final String message, @NonNull final Throwable cause
+  )
+  {
+    super(message, cause);
+    _line = line;
+    _character = character;
+  }
+
+  public int getLine () {
+    return _line;
+  }
+
+  public int getCharacter () {
+    return _character;
+  }
 }

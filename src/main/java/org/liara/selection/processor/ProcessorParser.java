@@ -27,6 +27,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.liara.selection.ThrowingErrorListener;
+import org.liara.selection.TranspilationException;
 import org.liara.selection.antlr.ProcessorsBaseListener;
 import org.liara.selection.antlr.ProcessorsLexer;
 import org.liara.selection.antlr.ProcessorsParser;
@@ -89,6 +91,19 @@ public class ProcessorParser
   public @NonNull ProcessorCall[] transpile (@NonNull final CharSequence expression) {
     @NonNull final ProcessorsLexer  lexer  = new ProcessorsLexer(CharStreams.fromString(expression.toString()));
     @NonNull final ProcessorsParser parser = new ProcessorsParser(new CommonTokenStream(lexer));
+
+    ParseTreeWalker.DEFAULT.walk(this, parser.processors());
+
+    return _result.toArray(new ProcessorCall[0]);
+  }
+
+  public @NonNull ProcessorCall[] tryToTranspile (@NonNull final CharSequence expression)
+  throws TranspilationException
+  {
+    @NonNull final ProcessorsLexer lexer = new ProcessorsLexer(CharStreams.fromString(expression.toString()));
+    lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+    @NonNull final ProcessorsParser parser = new ProcessorsParser(new CommonTokenStream(lexer));
+    parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
     ParseTreeWalker.DEFAULT.walk(this, parser.processors());
 

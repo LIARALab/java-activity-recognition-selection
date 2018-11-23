@@ -26,6 +26,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.selection.ThrowingErrorListener;
+import org.liara.selection.TranspilationException;
 import org.liara.selection.antlr.StringSelectionBaseListener;
 import org.liara.selection.antlr.StringSelectionLexer;
 import org.liara.selection.antlr.StringSelectionParser;
@@ -121,6 +123,19 @@ public class StringJPQLSelectionTranspiler
     @NonNull final StringSelectionLexer lexer = new StringSelectionLexer(CharStreams.fromString(expression.toString()));
 
     @NonNull final StringSelectionParser parser = new StringSelectionParser(new CommonTokenStream(lexer));
+
+    ParseTreeWalker.DEFAULT.walk(this, parser.selection());
+
+    return _currentSelection.build();
+  }
+
+  public @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
+  throws TranspilationException
+  {
+    @NonNull final StringSelectionLexer lexer = new StringSelectionLexer(CharStreams.fromString(expression.toString()));
+    lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+    @NonNull final StringSelectionParser parser = new StringSelectionParser(new CommonTokenStream(lexer));
+    parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 

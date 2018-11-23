@@ -28,6 +28,8 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.liara.selection.ThrowingErrorListener;
+import org.liara.selection.TranspilationException;
 import org.liara.selection.Utils;
 import org.liara.selection.antlr.DateSelectionBaseListener;
 import org.liara.selection.antlr.DateSelectionLexer;
@@ -348,6 +350,19 @@ public class DateTimeInRangeJPQLSelectionTranspiler
     @NonNull final DateSelectionLexer lexer = new DateSelectionLexer(CharStreams.fromString(expression.toString()));
 
     @NonNull final DateSelectionParser parser = new DateSelectionParser(new CommonTokenStream(lexer));
+
+    ParseTreeWalker.DEFAULT.walk(this, parser.selection());
+
+    return _currentSelection.build();
+  }
+
+  public @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
+  throws TranspilationException
+  {
+    @NonNull final DateSelectionLexer lexer = new DateSelectionLexer(CharStreams.fromString(expression.toString()));
+    lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+    @NonNull final DateSelectionParser parser = new DateSelectionParser(new CommonTokenStream(lexer));
+    parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 
