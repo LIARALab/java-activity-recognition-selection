@@ -64,8 +64,20 @@ class StringJPQLSelectionTranspilerSpecification
     final JPQLQuery result = transpiler.transpile("/ab\\/c?/")
 
     then: "we expect it to be able to transpile the regular expression"
-    result.clause == "(:this REGEXP :clause_0_expression)"
+    result.clause == "(function('regexp', :this, :clause_0_expression) = 1)"
     result.parameters == ["clause_0_expression": "ab/c?"]
+  }
+
+  def "it can transpile equal clauses" () {
+    given: "a transpiler"
+    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+
+    when: "we transpile an equal clause"
+    final JPQLQuery result = transpiler.transpile("eq:not:not:eq:pouet")
+
+    then: "we expect it to be able to transpile the equal clause"
+    result.clause == "(:this = :clause_0_keyword)"
+    result.parameters == ["clause_0_keyword": "pouet"]
   }
 
   def "it can transpile exact match clauses" () {
@@ -92,7 +104,7 @@ class StringJPQLSelectionTranspilerSpecification
       "",
       "(NOT (:this LIKE :clause_0_keyword) ",
       "AND NOT (:this LIKE :clause_1_keyword) ",
-      "AND NOT (:this REGEXP :clause_2_expression))"
+      "AND NOT (function('regexp', :this, :clause_2_expression) = 1)))"
     )
 
     result.parameters == [
@@ -114,7 +126,7 @@ class StringJPQLSelectionTranspilerSpecification
       "",
       "(:this LIKE :clause_0_keyword ",
       "AND :this LIKE :clause_1_keyword ",
-      "AND :this REGEXP :clause_2_expression ",
+      "AND function('regexp', :this, :clause_2_expression) = 1",
       "AND NOT (:this LIKE :clause_3_keyword))"
     )
     result.parameters == [
@@ -136,7 +148,7 @@ class StringJPQLSelectionTranspilerSpecification
     result.clause == String.join(
       "",
       "((:this LIKE :clause_0_keyword) OR ",
-      "(:this REGEXP :clause_1_expression ",
+      "(function('regexp', :this, :clause_1_expression = 1 ",
       "AND NOT (:this LIKE :clause_2_keyword)))"
     )
 

@@ -24,30 +24,107 @@ package org.liara.selection.processor;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
+@FunctionalInterface
 public interface ProcessorExecutor<Result>
 {
-  static <Result> ProcessorExecutor<Result> execute (@NonNull final Processor<Result> processor) {
-    return new Executor<>(processor);
-  }
-
-  static <Result> ProcessorExecutor<Result> executeIf (
-    @NonNull final ProcessorExecutor<Result> processor,
-    @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
+  static <Result> @NonNull ProcessorExecutor<Result> execute (
+    @NonNull final Processor<Result> processor
   )
   {
-    return new ConditionalExecutor<>(processor, condition);
+    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
+      @NonNull final List<Result> results = new ArrayList<>();
+
+      for (@NonNull final ProcessorCall call : calls) {
+        results.add(call.call(processor));
+      }
+
+      return results;
+    };
   }
 
-  static <Result> ProcessorExecutor<Result> map (@NonNull final Map<String, ProcessorExecutor<Result>> processors) {
-    return new MapExecutor<>(processors);
+  static <Result> @NonNull ProcessorExecutor<Result> executeIf (
+    @NonNull final ProcessorExecutor<Result> processor, @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
+  )
+  {
+    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
+      @NonNull final List<Result> results = new ArrayList<>();
+
+      for (@NonNull final ProcessorCall call : calls) {
+        if (condition.apply(call)) {
+          results.addAll(processor.execute(call));
+        }
+      }
+
+      return results;
+    };
   }
 
-  static <Result> ProcessorExecutor<Result> composition (@NonNull final ProcessorExecutor<Result>... processors) {
-    return new ComposedExecutor<>(processors);
+  static <Result> @NonNull ProcessorExecutor<Result> field (
+    @NonNull final String field, @NonNull final ProcessorExecutor<Result> processor
+  )
+  {
+    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
+      @NonNull final List<Result> results = new ArrayList<>();
+
+      for (@NonNull final ProcessorCall call : calls) {
+        if (field.equals(call.getFullIdentifier())) {
+          results.addAll(processor.execute(call));
+        }
+      }
+
+      return results;
+    };
   }
 
-  @NonNull Result[] execute (@NonNull final Iterable<@NonNull ProcessorCall> calls);
+  static <Result> @NonNull ProcessorExecutor<Result> map (
+    @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> bindings
+  )
+  {
+    @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> copy = new HashMap<>(bindings);
+
+    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
+      @NonNull final List<Result> results = new ArrayList<>();
+
+      for (@NonNull final ProcessorCall call : calls) {
+        if (copy.containsKey(call.getFullIdentifier())) {
+          results.addAll(copy.get(call.getFullIdentifier()).execute(call));
+        }
+      }
+
+      return results;
+    };
+  }
+
+  static <Result> @NonNull ProcessorExecutor<Result> composition (
+    @NonNull final ProcessorExecutor<Result>... processors
+  )
+  {
+    return composition(Arrays.asList(processors));
+  }
+
+  static <Result> @NonNull ProcessorExecutor<Result> composition (
+    @NonNull final List<@NonNull ProcessorExecutor<Result>> processors
+  )
+  {
+    @NonNull final List<@NonNull ProcessorExecutor<Result>> copy = new ArrayList<>(processors);
+
+    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
+      @NonNull final List<Result> results = new ArrayList<>();
+
+      for (@NonNull final ProcessorExecutor<Result> executor : copy) {
+        results.addAll(executor.execute(calls));
+      }
+
+      return results;
+    };
+  }
+
+  default @NonNull List<@NonNull Result> execute (@NonNull final ProcessorCall... calls) {
+    return execute(Arrays.asList(calls));
+  }
+
+  @NonNull List<@NonNull Result> execute (@NonNull final Iterable<@NonNull ProcessorCall> calls);
 }

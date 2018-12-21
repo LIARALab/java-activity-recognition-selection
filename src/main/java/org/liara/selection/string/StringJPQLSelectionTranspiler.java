@@ -88,27 +88,36 @@ public class StringJPQLSelectionTranspiler
   }
 
   private void exitToken (@NonNull final String text) {
-    @NonNull final String content;
+    @NonNull String content = text;
+    boolean         exact   = false;
 
-    if (text.startsWith("not:")) {
+    while (content.startsWith("not:") || content.startsWith("eq:")) {
+      if (text.startsWith("not:")) {
+        _currentClause.negate();
+      } else {
+        exact = true;
+      }
       content = text.substring(4);
-      _currentClause.negate();
-    } else {
-      content = text;
     }
 
     _currentClause.appendSelf();
-    _currentClause.appendLiteral("LIKE");
-    _currentClause.appendParameter("keyword", "%" + content + "%");
+
+    if (exact) {
+      _currentClause.appendLiteral("=");
+      _currentClause.appendParameter("keyword", content);
+    } else {
+      _currentClause.appendLiteral("LIKE");
+      _currentClause.appendParameter("keyword", "%" + content + "%");
+    }
   }
 
   private void exitRegexp (@NonNull final String expression) {
     @NonNull final String content = expression.substring(1, expression.length() - 1)
                                               .replaceAll("\\\\/", "/");
 
-    _currentClause.appendSelf();
-    _currentClause.appendLiteral("REGEXP");
+    _currentClause.appendLiteral("function('regexp', " + _currentClause.self() + ", ");
     _currentClause.appendParameter("expression", content);
+    _currentClause.append(") = 1");
   }
 
   private void exitString (@NonNull final String expression) {
