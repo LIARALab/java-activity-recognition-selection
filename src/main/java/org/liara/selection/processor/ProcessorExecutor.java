@@ -26,7 +26,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @FunctionalInterface
 public interface ProcessorExecutor<Result>
@@ -35,15 +34,7 @@ public interface ProcessorExecutor<Result>
     @NonNull final Processor<Result> processor
   )
   {
-    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
-      @NonNull final List<Result> results = new ArrayList<>();
-
-      for (@NonNull final ProcessorCall call : calls) {
-        results.add(call.call(processor));
-      }
-
-      return results;
-    };
+    return (@NonNull final ProcessorCall call) -> Optional.of(call.call(processor));
   }
 
   static <Result> @NonNull ProcessorExecutor<Result> executeIf (
@@ -51,16 +42,12 @@ public interface ProcessorExecutor<Result>
     @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
   )
   {
-    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
-      @NonNull final List<Result> results = new ArrayList<>();
-
-      for (@NonNull final ProcessorCall call : calls) {
-        if (condition.apply(call)) {
-          results.addAll(processor.execute(call));
-        }
+    return (@NonNull final ProcessorCall call) -> {
+      if (condition.apply(call)) {
+        return processor.execute(call);
       }
 
-      return results;
+      return Optional.empty();
     };
   }
 
@@ -68,16 +55,12 @@ public interface ProcessorExecutor<Result>
     @NonNull final String field, @NonNull final ProcessorExecutor<Result> processor
   )
   {
-    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
-      @NonNull final List<Result> results = new ArrayList<>();
-
-      for (@NonNull final ProcessorCall call : calls) {
-        if (field.equals(call.getIdentifier(0))) {
-          results.addAll(processor.execute(call.next()));
-        }
+    return (@NonNull final ProcessorCall call) -> {
+      if (field.equals(call.getIdentifier(0))) {
+        return processor.execute(call.next());
       }
 
-      return results;
+      return Optional.empty();
     };
   }
 
@@ -87,16 +70,12 @@ public interface ProcessorExecutor<Result>
   {
     @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> copy = new HashMap<>(bindings);
 
-    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
-      @NonNull final List<Result> results = new ArrayList<>();
-
-      for (@NonNull final ProcessorCall call : calls) {
-        if (copy.containsKey(call.getIdentifier(0))) {
-          results.addAll(copy.get(call.getIdentifier(0)).execute(call.next()));
-        }
+    return (@NonNull final ProcessorCall call) -> {
+      if (copy.containsKey(call.getIdentifier(0))) {
+        return copy.get(call.getIdentifier(0)).execute(call.next());
       }
 
-      return results;
+      return Optional.empty();
     };
   }
 
@@ -113,25 +92,48 @@ public interface ProcessorExecutor<Result>
   {
     @NonNull final List<@NonNull ProcessorExecutor<Result>> copy = new ArrayList<>(processors);
 
-    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
-      @NonNull final List<Result> results = new ArrayList<>();
-
+    return (@NonNull final ProcessorCall call) -> {
       for (@NonNull final ProcessorExecutor<Result> executor : copy) {
-        results.addAll(executor.execute(calls));
+        @NonNull final Optional<Result> result = executor.execute(call);
+
+        if (result.isPresent()) return result;
       }
 
-      return results;
+      return Optional.empty();
     };
   }
 
-  default <Next> @NonNull ProcessorExecutor<Next> map (@NonNull final Function<Result, Next> mapper) {
-    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> execute(calls).stream().map(mapper).collect(
-      Collectors.toList());
+  default <Next> @NonNull ProcessorExecutor<Next> mapNonNull (@NonNull final Function<Result, Next> mapper) {
+    return (@NonNull final ProcessorCall call) -> {
+      @NonNull final Optional<Result> result = execute(call);
+
+      if (result.isPresent()) {
+        return Optional.of(mapper.apply(result.get()));
+      } else {
+        return Optional.empty();
+      }
+    };
   }
 
   default @NonNull List<@NonNull Result> execute (@NonNull final ProcessorCall... calls) {
-    return execute(Arrays.asList(calls));
+    @NonNull final List<@NonNull Result> results = new ArrayList<>();
+
+    for (@NonNull final ProcessorCall call : calls) {
+      execute(call).ifPresent(results::add);
+    }
+
+    return results;
   }
 
-  @NonNull List<@NonNull Result> execute (@NonNull final Iterable<@NonNull ProcessorCall> calls);
+  default @NonNull List<@NonNull Result> execute (@NonNull final Iterable<ProcessorCall> calls) {
+    @NonNull final List<@NonNull Result> results = new ArrayList<>();
+
+    for (@NonNull final ProcessorCall call : calls) {
+      execute(call).ifPresent(results::add);
+    }
+
+    return results;
+  }
+
+  @NonNull Optional<Result> execute (@NonNull final ProcessorCall call);
 }
