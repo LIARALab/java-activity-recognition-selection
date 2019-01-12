@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @FunctionalInterface
 public interface ProcessorExecutor<Result>
@@ -46,7 +47,8 @@ public interface ProcessorExecutor<Result>
   }
 
   static <Result> @NonNull ProcessorExecutor<Result> executeIf (
-    @NonNull final ProcessorExecutor<Result> processor, @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
+    @NonNull final ProcessorExecutor<Result> processor,
+    @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
   )
   {
     return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> {
@@ -70,8 +72,8 @@ public interface ProcessorExecutor<Result>
       @NonNull final List<Result> results = new ArrayList<>();
 
       for (@NonNull final ProcessorCall call : calls) {
-        if (field.equals(call.getFullIdentifier())) {
-          results.addAll(processor.execute(call));
+        if (field.equals(call.getIdentifier(0))) {
+          results.addAll(processor.execute(call.next()));
         }
       }
 
@@ -79,7 +81,7 @@ public interface ProcessorExecutor<Result>
     };
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> map (
+  static <Result> @NonNull ProcessorExecutor<Result> fields (
     @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> bindings
   )
   {
@@ -89,8 +91,8 @@ public interface ProcessorExecutor<Result>
       @NonNull final List<Result> results = new ArrayList<>();
 
       for (@NonNull final ProcessorCall call : calls) {
-        if (copy.containsKey(call.getFullIdentifier())) {
-          results.addAll(copy.get(call.getFullIdentifier()).execute(call));
+        if (copy.containsKey(call.getIdentifier(0))) {
+          results.addAll(copy.get(call.getIdentifier(0)).execute(call.next()));
         }
       }
 
@@ -98,14 +100,14 @@ public interface ProcessorExecutor<Result>
     };
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> composition (
+  static <Result> @NonNull ProcessorExecutor<Result> all (
     @NonNull final ProcessorExecutor<Result>... processors
   )
   {
-    return composition(Arrays.asList(processors));
+    return all(Arrays.asList(processors));
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> composition (
+  static <Result> @NonNull ProcessorExecutor<Result> all (
     @NonNull final List<@NonNull ProcessorExecutor<Result>> processors
   )
   {
@@ -120,6 +122,11 @@ public interface ProcessorExecutor<Result>
 
       return results;
     };
+  }
+
+  default <Next> @NonNull ProcessorExecutor<Next> map (@NonNull final Function<Result, Next> mapper) {
+    return (@NonNull final Iterable<@NonNull ProcessorCall> calls) -> execute(calls).stream().map(mapper).collect(
+      Collectors.toList());
   }
 
   default @NonNull List<@NonNull Result> execute (@NonNull final ProcessorCall... calls) {
