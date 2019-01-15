@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -92,12 +92,13 @@ public class StringJPQLSelectionTranspiler
     boolean         exact   = false;
 
     while (content.startsWith("not:") || content.startsWith("eq:")) {
-      if (text.startsWith("not:")) {
+      if (content.startsWith("not:")) {
+        content = content.substring(4);
         _currentClause.negate();
       } else {
         exact = true;
+        content = content.substring(3);
       }
-      content = text.substring(4);
     }
 
     _currentClause.appendSelf();
@@ -115,7 +116,7 @@ public class StringJPQLSelectionTranspiler
     @NonNull final String content = expression.substring(1, expression.length() - 1)
                                               .replaceAll("\\\\/", "/");
 
-    _currentClause.appendLiteral("function('regexp', " + _currentClause.self() + ", ");
+    _currentClause.appendLiteral("function('regexp', " + _currentClause.self() + ",");
     _currentClause.appendParameter("expression", content);
     _currentClause.append(") = 1");
   }

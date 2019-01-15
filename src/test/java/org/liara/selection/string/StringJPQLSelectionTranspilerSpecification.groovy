@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -104,7 +104,7 @@ class StringJPQLSelectionTranspilerSpecification
       "",
       "(NOT (:this LIKE :clause_0_keyword) ",
       "AND NOT (:this LIKE :clause_1_keyword) ",
-      "AND NOT (function('regexp', :this, :clause_2_expression) = 1)))"
+      "AND NOT (function('regexp', :this, :clause_2_expression) = 1))"
     )
 
     result.parameters == [
@@ -126,7 +126,7 @@ class StringJPQLSelectionTranspilerSpecification
       "",
       "(:this LIKE :clause_0_keyword ",
       "AND :this LIKE :clause_1_keyword ",
-      "AND function('regexp', :this, :clause_2_expression) = 1",
+      "AND function('regexp', :this, :clause_2_expression) = 1 ",
       "AND NOT (:this LIKE :clause_3_keyword))"
     )
     result.parameters == [
@@ -148,7 +148,7 @@ class StringJPQLSelectionTranspilerSpecification
     result.clause == String.join(
       "",
       "((:this LIKE :clause_0_keyword) OR ",
-      "(function('regexp', :this, :clause_1_expression = 1 ",
+      "(function('regexp', :this, :clause_1_expression) = 1 ",
       "AND NOT (:this LIKE :clause_2_keyword)))"
     )
 
