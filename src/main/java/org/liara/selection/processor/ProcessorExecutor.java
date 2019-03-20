@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface ProcessorExecutor<Result>
@@ -49,6 +50,12 @@ public interface ProcessorExecutor<Result>
 
       return Optional.empty();
     };
+  }
+
+  static <Result> @NonNull ProcessorExecutor<Result> factory (
+    @NonNull final Supplier<ProcessorExecutor<Result>> supplier
+  ) {
+    return (@NonNull final ProcessorCall call) -> supplier.get().execute(call);
   }
 
   static <Result> @NonNull ProcessorExecutor<Result> field (

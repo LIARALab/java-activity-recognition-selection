@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -117,24 +117,28 @@ public class DateTimeJPQLSelectionTranspiler
     final DateSelectionParser.@NonNull OperationContext context
   )
   {
-    @NonNull final PartialZonedDateTime date     = parseDate(context.date());
+    @NonNull final PartialZonedDateTime date = parseDate(context.date());
     @NonNull final String               operator = getOperator(context.name);
+    @NonNull final String               self = JPQLDateTimeSelector.zone(
+      _currentClause.self(),
+      date.getZone()
+    );
 
     boolean first = true;
 
     if (date.isDate() || date.isTime()) {
       if (date.isDateTime()) {
-        _currentClause.appendSelf();
+        _currentClause.appendLiteral(self);
         _currentClause.appendLiteral(operator);
-        _currentClause.appendParameter("value", DateTimeFormatter.ISO_DATE_TIME.format(date));
+        _currentClause.appendParameter("value", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(date));
       } else if (date.isDate()) {
-        _currentClause.appendLiteral(JPQLDateTimeSelector.toDate(_currentClause.self()));
+        _currentClause.appendLiteral(JPQLDateTimeSelector.toDate(self));
         _currentClause.appendLiteral(operator);
-        _currentClause.appendParameter("value", DateTimeFormatter.ISO_DATE.format(date));
+        _currentClause.appendParameter("value", DateTimeFormatter.ISO_LOCAL_DATE.format(date));
       } else {
-        _currentClause.appendLiteral(JPQLDateTimeSelector.toTime(_currentClause.self()));
+        _currentClause.appendLiteral(JPQLDateTimeSelector.toTime(self));
         _currentClause.appendLiteral(operator);
-        _currentClause.appendParameter("value", DateTimeFormatter.ISO_TIME.format(date));
+        _currentClause.appendParameter("value", DateTimeFormatter.ISO_LOCAL_TIME.format(date));
       }
 
       first = false;
@@ -150,12 +154,17 @@ public class DateTimeJPQLSelectionTranspiler
       }
 
       for (@NonNull final ChronoField field : fields) {
-        if (first) first = false;
-        else _currentClause.appendLiteral("AND");
+        if (field != ChronoField.OFFSET_SECONDS) {
+          if (first) first = false;
+          else _currentClause.appendLiteral("AND");
 
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, _currentClause.self()));
-        _currentClause.appendLiteral(operator);
-        _currentClause.appendParameter("value_" + field.toString().toLowerCase(), field.getFrom(date));
+          _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, self));
+          _currentClause.appendLiteral(operator);
+          _currentClause.appendParameter(
+            "value_" + field.toString().toLowerCase(),
+            field.getFrom(date)
+          );
+        }
       }
     }
   }
@@ -191,30 +200,39 @@ public class DateTimeJPQLSelectionTranspiler
   }
 
   private void appendBetween (
-    @NonNull final PartialZonedDateTime min, @NonNull final PartialZonedDateTime max
+    @NonNull final PartialZonedDateTime min,
+    @NonNull final PartialZonedDateTime max
   )
   {
-    boolean first = true;
+    @NonNull final String selfMin = JPQLDateTimeSelector.zone(_currentClause.self(), min.getZone());
+    @NonNull final String selfMax = JPQLDateTimeSelector.zone(_currentClause.self(), max.getZone());
+    boolean               first   = true;
 
     if (min.isDate() || min.isTime()) {
       if (min.isDateTime()) {
-        _currentClause.appendSelf();
-        _currentClause.appendLiteral("BETWEEN");
-        _currentClause.appendParameter("min", DateTimeFormatter.ISO_DATE_TIME.format(min));
+        _currentClause.appendLiteral(selfMin);
+        _currentClause.appendLiteral(">=");
+        _currentClause.appendParameter("min", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(min));
         _currentClause.appendLiteral("AND");
-        _currentClause.appendParameter("max", DateTimeFormatter.ISO_DATE_TIME.format(max));
+        _currentClause.appendLiteral(selfMax);
+        _currentClause.appendLiteral("<=");
+        _currentClause.appendParameter("max", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(max));
       } else if (min.isDate()) {
-        _currentClause.appendLiteral(JPQLDateTimeSelector.toDate(_currentClause.self()));
-        _currentClause.appendLiteral("BETWEEN");
-        _currentClause.appendParameter("min", DateTimeFormatter.ISO_DATE.format(min));
+        _currentClause.appendLiteral(JPQLDateTimeSelector.toDate(selfMin));
+        _currentClause.appendLiteral(">=");
+        _currentClause.appendParameter("min", DateTimeFormatter.ISO_LOCAL_DATE.format(min));
         _currentClause.appendLiteral("AND");
-        _currentClause.appendParameter("max", DateTimeFormatter.ISO_DATE.format(max));
+        _currentClause.appendLiteral(JPQLDateTimeSelector.toDate(selfMax));
+        _currentClause.appendLiteral("<=");
+        _currentClause.appendParameter("max", DateTimeFormatter.ISO_LOCAL_DATE.format(max));
       } else {
-        _currentClause.appendLiteral(JPQLDateTimeSelector.toTime(_currentClause.self()));
-        _currentClause.appendLiteral("BETWEEN");
-        _currentClause.appendParameter("min", DateTimeFormatter.ISO_TIME.format(min));
+        _currentClause.appendLiteral(JPQLDateTimeSelector.toTime(selfMin));
+        _currentClause.appendLiteral(">=");
+        _currentClause.appendParameter("min", DateTimeFormatter.ISO_LOCAL_TIME.format(min));
         _currentClause.appendLiteral("AND");
-        _currentClause.appendParameter("max", DateTimeFormatter.ISO_TIME.format(max));
+        _currentClause.appendLiteral(JPQLDateTimeSelector.toTime(selfMax));
+        _currentClause.appendLiteral("<=");
+        _currentClause.appendParameter("max", DateTimeFormatter.ISO_LOCAL_TIME.format(max));
       }
 
       first = false;
@@ -233,10 +251,12 @@ public class DateTimeJPQLSelectionTranspiler
         if (first) first = false;
         else _currentClause.appendLiteral("AND");
 
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, _currentClause.self()));
-        _currentClause.appendLiteral("BETWEEN");
+        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, selfMin));
+        _currentClause.appendLiteral(">=");
         _currentClause.appendParameter("min_" + field.toString().toLowerCase(), field.getFrom(min));
         _currentClause.appendLiteral("AND");
+        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, selfMax));
+        _currentClause.appendLiteral("<=");
         _currentClause.appendParameter("max_" + field.toString().toLowerCase(), field.getFrom(max));
       }
     }

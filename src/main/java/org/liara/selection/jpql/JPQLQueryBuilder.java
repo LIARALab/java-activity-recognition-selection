@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,7 @@ public class JPQLQueryBuilder
 
   public void appendClause (@NonNull final String clause, @NonNull final Map<String, Object> parameters) {
     @NonNull final String namespace = "clause_" + _clauses;
-    appendClause(clause.replaceAll(":(?!this)([a-zA-Z0-9_]+)", ":" + namespace + "_$1"));
+    appendClause(clause.replaceAll(":(?!this)([a-zA-Z_][a-zA-Z0-9_]*)", ":" + namespace + "_$1"));
 
     for (final Map.Entry<@NonNull String, @NonNull Object> parameter : parameters.entrySet()) {
       _parameters.put(namespace + "_" + parameter.getKey(), parameter.getValue());
