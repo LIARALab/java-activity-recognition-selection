@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -224,7 +224,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
     expect: "it to be able to transpile disjunction of conjunctions"
     transpiler.transpile("not:gt:5.689,lt:3.56;lte:4.36") == JPQLQuery.query(
-      "((NOT (:this > :clause_0_value) AND :this < :clause_1_value) OR (:this <= :clause_2_value))",
+      "(NOT (:this > :clause_0_value) AND :this < :clause_1_value) OR (:this <= :clause_2_value)",
       [
         "clause_0_value": Double.parseDouble("5.689"),
         "clause_1_value": Double.parseDouble("3.56"),
@@ -233,7 +233,7 @@ class NumberJPQLSelectionTranspilerSpecification
     )
 
     transpiler.transpile("not:gt:5.689;lt:3.56;lte:4.36") == JPQLQuery.query(
-      "((NOT (:this > :clause_0_value)) OR (:this < :clause_1_value) OR (:this <= :clause_2_value))",
+      "(NOT (:this > :clause_0_value)) OR (:this < :clause_1_value) OR (:this <= :clause_2_value)",
       [
         "clause_0_value": Double.parseDouble("5.689"),
         "clause_1_value": Double.parseDouble("3.56"),

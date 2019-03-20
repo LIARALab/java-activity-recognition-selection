@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -196,10 +196,10 @@ class DurationJPQLSelectionTranspilerSpecification
     then: " we expect the transpiler to be able to transpile the disjunction of conjunctions"
     result.clause == String.join(
       "",
-      "((:this > :clause_0_value) OR ",
+      "(:this > :clause_0_value) OR ",
       "(:this <= :clause_1_value AND ",
       "NOT (:this BETWEEN :clause_2_min AND :clause_2_max)) OR ",
-      "(:this = :clause_3_value))"
+      "(:this = :clause_3_value)"
     )
 
     result.parameters == [

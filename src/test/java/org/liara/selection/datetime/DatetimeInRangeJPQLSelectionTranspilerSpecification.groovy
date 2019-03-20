@@ -25,8 +25,9 @@ package org.liara.selection.datetime
 import org.liara.selection.jpql.JPQLQuery
 import spock.lang.Specification
 
-class DatetimeJPQLSelectionTranspilerSpecification
-  extends Specification {
+class DatetimeInRangeJPQLSelectionTranspilerSpecification
+  extends Specification
+{
 
   def setup () {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
@@ -34,13 +35,13 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile greater than clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a greater than clause"
     final JPQLQuery result = transpiler.transpile("gt:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the greater than clause"
-    result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_0_value)"
+    result.clause == "((CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') > :clause_0_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') > :clause_0_value))"
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
@@ -48,13 +49,13 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile greater than or equal clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a greater than or equal clause"
     final JPQLQuery result = transpiler.transpile("gte:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the greater than or equal clause"
-    result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') >= :clause_0_value)"
+    result.clause == "((CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') >= :clause_0_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_value))"
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
@@ -62,13 +63,13 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile less than clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a less than clause"
     final JPQLQuery result = transpiler.transpile("lt:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the less than clause"
-    result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_0_value)"
+    result.clause == "((CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') < :clause_0_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') < :clause_0_value))"
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
@@ -76,13 +77,13 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile less than or equal clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a less than or equal clause"
     final JPQLQuery result = transpiler.transpile("lte:(2018-12-10T15:20:30+01:00[Europe/Paris])")
 
     then: " we expect the transpiler to be able to transpile the less than or equal clause"
-    result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') <= :clause_0_value)"
+    result.clause == "((CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') <= :clause_0_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') <= :clause_0_value))"
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
@@ -90,7 +91,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile equal clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile an equal clause"
     final JPQLQuery[] results = [
@@ -100,7 +101,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
     then: " we expect the transpiler to be able to transpile the equal clause"
     for (final JPQLQuery result : results) {
-      result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value)"
+      result.clause == "((CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') <= :clause_0_value AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_value))"
       result.parameters == [
         "clause_0_value": '2018-12-10T15:20:30'
       ]
@@ -109,7 +110,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile range clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a range clause"
     final JPQLQuery[] results = [
@@ -123,7 +124,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
     then: " we expect the transpiler to be able to transpile the range clause"
     for (final JPQLQuery result : results) {
-      result.clause == "(CONVERT_TZ(:this, 'UTC', 'America/New-York') >= :clause_0_min AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') <= :clause_0_max)"
+      result.clause == "(CONVERT_TZ(:this.lower, 'UTC', 'America/New_York') <= :clause_0_max AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_min)"
       result.parameters == [
         "clause_0_min": '2018-12-16T18:10:20',
         "clause_0_max": '2018-12-16T15:20:30'
@@ -133,7 +134,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile negation of clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a less than or equal clause"
     final JPQLQuery[] results = [
@@ -144,13 +145,15 @@ class DatetimeJPQLSelectionTranspilerSpecification
     ] as JPQLQuery[]
 
     then: " we expect the transpiler to be able to transpile the less than or equal clause"
-    results[0].clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value))"
+    results[
+      0
+    ].clause == "(NOT (CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') <= :clause_0_value AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_value))"
     results[0].parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
     results[
       1
-    ].clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') >= :clause_0_min AND CONVERT_TZ(:this, 'UTC', 'America/New_York') <= :clause_0_max))"
+    ].clause == "(NOT (CONVERT_TZ(:this.lower, 'UTC', 'America/New_York') <= :clause_0_max AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_min))"
     results[1].parameters == [
       "clause_0_min": '2018-12-16T11:20:30',
       "clause_0_max": '2018-12-16T18:10:20'
@@ -159,7 +162,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile conjunction of clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a conjunction of clauses"
     final JPQLQuery result = transpiler.transpile(
@@ -168,7 +171,12 @@ class DatetimeJPQLSelectionTranspilerSpecification
     )
 
     then: "we expect the transpiler to be able to transpile the conjunction of clauses"
-    result.clause == "NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value) AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_1_value AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_2_value"
+    result.clause == "(" +
+      "NOT (CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') <= :clause_0_value AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_value) " +
+      "AND (CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') < :clause_1_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') < :clause_1_value) " +
+      "AND (CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') > :clause_2_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') > :clause_2_value)" +
+      ")"
+
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30',
       "clause_1_value": '2018-12-20T15:20:30',
@@ -178,7 +186,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile disjunction of clauses" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a disjunction of clauses"
     final JPQLQuery result = transpiler.transpile(
@@ -187,7 +195,10 @@ class DatetimeJPQLSelectionTranspilerSpecification
     )
 
     then: "we expect the transpiler to be able to transpile the disjunction of clauses"
-    result.clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value) AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_1_value) OR (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_2_value)"
+    result.clause == "(NOT (CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') <= :clause_0_value AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_value) " +
+      "AND (CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') < :clause_1_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') < :clause_1_value)) " +
+      "OR ((CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') > :clause_2_value OR CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') > :clause_2_value))"
+
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30',
       "clause_1_value": '2018-12-20T15:20:30',
@@ -197,7 +208,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile datetime" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a datetime"
     final JPQLQuery[] result = [
@@ -206,12 +217,14 @@ class DatetimeJPQLSelectionTranspilerSpecification
     ]
 
     then: "we expect the transpiler to be able to transpile the datetime"
-    result[0].clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value)"
+    result[
+      0
+    ].clause == "(CONVERT_TZ(:this.lower, 'UTC', 'Europe/Paris') <= :clause_0_value AND CONVERT_TZ(:this.upper, 'UTC', 'Europe/Paris') >= :clause_0_value)"
     result[0].parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
 
-    result[1].clause == "(:this = :clause_0_value)"
+    result[1].clause == "(:this.lower <= :clause_0_value AND :this.upper >= :clause_0_value)"
     result[1].parameters == [
       "clause_0_value": '2018-12-10T15:20:30'
     ]
@@ -219,7 +232,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile date" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a date"
     final JPQLQuery[] result = [
@@ -228,11 +241,15 @@ class DatetimeJPQLSelectionTranspilerSpecification
     ]
 
     then: "we expect the transpiler to be able to transpile the date"
-    result[0].clause == "(DATE_FORMAT(:this, '%Y-%m-%d') = :clause_0_value)"
+    result[
+      0
+    ].clause == "(DATE_FORMAT(:this.lower, '%Y-%m-%d') <= :clause_0_value AND DATE_FORMAT(:this.upper, '%Y-%m-%d') >= :clause_0_value)"
     result[0].parameters == [
       "clause_0_value": '2018-12-10'
     ]
-    result[1].clause == "(DATE_FORMAT(CONVERT_TZ(:this, 'UTC', '+05:00'), '%Y-%m-%d') = :clause_0_value)"
+    result[
+      1
+    ].clause == "(DATE_FORMAT(CONVERT_TZ(:this.lower, 'UTC', '+05:00'), '%Y-%m-%d') <= :clause_0_value AND DATE_FORMAT(CONVERT_TZ(:this.upper, 'UTC', '+05:00'), '%Y-%m-%d') >= :clause_0_value)"
     result[1].parameters == [
       "clause_0_value": '2018-12-10'
     ]
@@ -240,7 +257,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile time" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a time"
     final JPQLQuery[] result = [
@@ -249,11 +266,15 @@ class DatetimeJPQLSelectionTranspilerSpecification
     ]
 
     then: "we expect the transpiler to be able to transpile the time"
-    result[0].clause == "(DATE_FORMAT(:this, '%H:%i:%s.%f') = :clause_0_value)"
+    result[
+      0
+    ].clause == "(DATE_FORMAT(:this.lower, '%H:%i:%s.%f') <= :clause_0_value AND DATE_FORMAT(:this.upper, '%H:%i:%s.%f') >= :clause_0_value)"
     result[0].parameters == [
       "clause_0_value": '15:20:30'
     ]
-    result[1].clause == "(DATE_FORMAT(CONVERT_TZ(:this, 'UTC', '+05:00'), '%H:%i:%s.%f') = :clause_0_value)"
+    result[
+      1
+    ].clause == "(DATE_FORMAT(CONVERT_TZ(:this.lower, 'UTC', '+05:00'), '%H:%i:%s.%f') <= :clause_0_value AND DATE_FORMAT(CONVERT_TZ(:this.upper, 'UTC', '+05:00'), '%H:%i:%s.%f') >= :clause_0_value)"
     result[1].parameters == [
       "clause_0_value": '15:20:30'
     ]
@@ -261,7 +282,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
   def "it can transpile fully custom format" () {
     given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
+    final DateTimeInRangeJPQLSelectionTranspiler transpiler = new DateTimeInRangeJPQLSelectionTranspiler()
 
     when: "we try to transpile a fully custom format"
     final JPQLQuery[] result = [
@@ -270,7 +291,9 @@ class DatetimeJPQLSelectionTranspilerSpecification
     ]
 
     then: "we expect the transpiler to be able to transpile the fully custom format"
-    result[0].clause == "(DAYOFWEEK(:this) = :clause_0_value_dayofweek AND HOUR(:this) = :clause_0_value_hourofday)"
+    result[
+      0
+    ].clause == "((DAYOFWEEK(:this.lower) <= :clause_0_value_dayofweek AND (DAYOFWEEK(:this.lower) != :clause_0_value_dayofweek OR HOUR(:this.lower) <= :clause_0_value_hourofday) AND DAYOFWEEK(:this.upper) >= :clause_0_value_dayofweek AND (DAYOFWEEK(:this.upper) != :clause_0_value_dayofweek OR HOUR(:this.upper) >= :clause_0_value_hourofday)))"
     result[0].parameters == [
       "clause_0_value_dayofweek": 1,
       "clause_0_value_hourofday": 15
@@ -278,67 +301,10 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
     result[
       1
-    ].clause == "(DAYOFWEEK(CONVERT_TZ(:this, 'UTC', '+05:00')) = :clause_0_value_dayofweek AND HOUR(CONVERT_TZ(:this, 'UTC', '+05:00')) = :clause_0_value_hourofday)"
+    ].clause == "((DAYOFWEEK(CONVERT_TZ(:this.lower, 'UTC', '+05:00')) <= :clause_0_value_dayofweek AND (DAYOFWEEK(CONVERT_TZ(:this.lower, 'UTC', '+05:00')) != :clause_0_value_dayofweek OR HOUR(CONVERT_TZ(:this.lower, 'UTC', '+05:00')) <= :clause_0_value_hourofday) AND DAYOFWEEK(CONVERT_TZ(:this.upper, 'UTC', '+05:00')) >= :clause_0_value_dayofweek AND (DAYOFWEEK(CONVERT_TZ(:this.upper, 'UTC', '+05:00')) != :clause_0_value_dayofweek OR HOUR(CONVERT_TZ(:this.upper, 'UTC', '+05:00')) >= :clause_0_value_hourofday)))"
     result[1].parameters == [
       "clause_0_value_dayofweek": 1,
       "clause_0_value_hourofday": 15
     ]
-  }
-
-
-  def "it can transpile comparison of partial dates" () {
-    given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
-
-    when: "we try to transpile a fully custom format"
-    final JPQLQuery result = transpiler.transpile(
-      "locale:(en)format:(EEEE HH'h'mm'm')(Tuesday 20h30m):(Monday 15h20m)"
-    )
-
-    then: "we expect the transpiler to be able to transpile the fully custom format"
-    result.clause == [
-      "((",
-      "DAYOFWEEK(:this) >= :clause_0_min_dayofweek AND (",
-      "DAYOFWEEK(:this) != :clause_0_min_dayofweek OR HOUR(:this) >= :clause_0_min_hourofday AND (",
-      "HOUR(:this) != :clause_0_min_hourofday OR MINUTE(:this) >= :clause_0_min_minuteofhour",
-      ")",
-      ")",
-      " AND ",
-      "DAYOFWEEK(:this) <= :clause_0_max_dayofweek AND (",
-      "DAYOFWEEK(:this) != :clause_0_max_dayofweek OR HOUR(:this) <= :clause_0_max_hourofday AND (",
-      "HOUR(:this) != :clause_0_max_hourofday OR MINUTE(:this) <= :clause_0_max_minuteofhour",
-      ")",
-      ")",
-      "))"
-    ].join("")
-
-    result.parameters == [
-      "clause_0_min_dayofweek": 1,
-      "clause_0_min_hourofday": 15,
-      "clause_0_min_minuteofhour": 20,
-      "clause_0_max_dayofweek": 2,
-      "clause_0_max_hourofday": 20,
-      "clause_0_max_minuteofhour": 30
-    ]
-  }
-
-  def "it can rebalance partial filters" () {
-    given: "a transpiler"
-    final DateTimeJPQLSelectionTranspiler transpiler = new DateTimeJPQLSelectionTranspiler()
-
-    when: "we try to transpile a fully custom format"
-    final JPQLQuery[] results = [
-      transpiler.transpile("format:(HH'h'X)(08h-03):(15h+05)"),
-      transpiler.transpile("format:(HH'h'X)(15h+05):(08h-03)")
-    ]
-
-    then: "we expect the transpiler to be able to transpile the fully custom format"
-    for (final JPQLQuery result : results) {
-      result.clause == "(HOUR(CONVERT_TZ(:this, 'UTC', '+05:00')) >= :clause_0_min_hourofday AND HOUR(CONVERT_TZ(:this, 'UTC', '-03:00')) <= :clause_0_max_hourofday)"
-      result.parameters == [
-        "clause_0_value_min_hourofday": 15,
-        "clause_0_value_max_hourofday": 8
-      ]
-    }
   }
 }

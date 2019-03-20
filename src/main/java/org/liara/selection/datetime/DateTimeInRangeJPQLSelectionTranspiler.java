@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@ import org.liara.selection.jpql.JPQLSelectionTranspiler;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Iterator;
 import java.util.Locale;
 
 public class DateTimeInRangeJPQLSelectionTranspiler
@@ -68,57 +69,44 @@ public class DateTimeInRangeJPQLSelectionTranspiler
   }
 
   @Override
-  public void enterSelection (
-    final DateSelectionParser.@NonNull SelectionContext context
-  )
-  {
+  public void enterSelection (final DateSelectionParser.@NonNull SelectionContext context) {
     _defaultLocale = Locale.getDefault();
     _defaultFormat = DateTimeFormatter.ISO_ZONED_DATE_TIME;
     _currentSelection.reset();
   }
 
   @Override
-  public void exitFilter (
-    final DateSelectionParser.@NonNull FilterContext context
-  )
-  {
+  public void exitFilter (final DateSelectionParser.@NonNull FilterContext context) {
     _currentSelection.appendFilter();
   }
 
   @Override
   public void exitDefaultConfiguration (
     final DateSelectionParser.@NonNull DefaultConfigurationContext context
-  )
-  {
+  ) {
     _defaultLocale = getLocaleFrom(context.locale());
     _defaultFormat = getFormatFrom(context.format(), _defaultLocale);
   }
 
   @Override
-  public void enterClause (
-    final DateSelectionParser.@NonNull ClauseContext context
-  )
-  { _currentClause.reset(); }
+  public void enterClause (final DateSelectionParser.@NonNull ClauseContext context) {
+    _currentClause.reset();
+  }
 
   @Override
-  public void exitClause (
-    final DateSelectionParser.@NonNull ClauseContext context
-  )
-  { _currentSelection.appendClause(_currentClause); }
+  public void exitClause (final DateSelectionParser.@NonNull ClauseContext context) {
+    _currentSelection.appendClause(_currentClause);
+  }
 
   @Override
-  public void exitNegation (
-    final DateSelectionParser.@NonNull NegationContext context
-  )
-  { _currentClause.negate(); }
+  public void exitNegation (final DateSelectionParser.@NonNull NegationContext context) {
+    _currentClause.negate();
+  }
 
   @Override
-  public void exitOperation (
-    final DateSelectionParser.@NonNull OperationContext context
-  )
-  {
-    @NonNull final PartialZonedDateTime date     = parseDate(context.date());
-    @NonNull final String               operator = getOperator(context.name);
+  public void exitOperation (final DateSelectionParser.@NonNull OperationContext context) {
+    @NonNull final PartialDate date     = parseDate(context.date());
+    @NonNull final String      operator = getOperator(context.name);
 
     switch (operator) {
       case "=": exitEquality(date);
@@ -128,105 +116,131 @@ public class DateTimeInRangeJPQLSelectionTranspiler
     }
   }
 
-  private void exitOperator (@NonNull final String operator, @NonNull final PartialZonedDateTime date) {
+  private void exitOperator (
+    @NonNull final String operator,
+    @NonNull final PartialDate date
+  ) {
+    appendOperation("lower", operator, date, "value");
+    _currentClause.appendLiteral("OR");
+    appendOperation("upper", operator, date, "value");
+  }
+
+  private void exitEquality (@NonNull final PartialDate date) {
+    appendOperation("lower", "<=", date, "value");
+    _currentClause.appendLiteral("AND");
+    appendOperation("upper", ">=", date, "value");
+  }
+
+  private void appendOperation (
+    @NonNull final String suffix,
+    @NonNull final String operator,
+    @NonNull final PartialDate date,
+    @NonNull final String parameterName
+  ) {
     boolean first = true;
 
-    if (date.isDate() || date.isTime()) {
-      _currentClause.appendLiteral("(");
-      _currentClause.append(asComparable(":this.lower", date));
+    if (date.supportsDate() || date.supportsTime()) {
+      _currentClause.appendLiteral(getLiteralForPlainComparisonWith(suffix, date));
       _currentClause.appendLiteral(operator);
-      _currentClause.appendParameter("value", formatFull(date));
-      _currentClause.appendLiteral("OR");
-      _currentClause.appendLiteral(asComparable(":this.upper", date));
-      _currentClause.appendLiteral(operator);
-      _currentClause.appendParameter("value");
-      _currentClause.append(")");
+      _currentClause.appendParameter(parameterName, toValueForPlainComparison(date));
 
       first = false;
     }
 
-    if (date.isPartial()) {
-      @NonNull final Iterable<ChronoField> fields;
+    if (date.supportsPartials()) {
+      @NonNull final Iterator<@NonNull ChronoField> fields             = date.partialFields();
+      int                                           parenthesisToClose = 0;
+      @Nullable ChronoField                         previousField      = null;
 
-      if (first) {
-        fields = date.fields();
-      } else {
-        fields = date.isPartialDate() ? date.dateFields() : date.timeFields();
+      if (!first) _currentClause.appendLiteral("AND");
+
+      while (fields.hasNext()) {
+        @NonNull final ChronoField field = fields.next();
+
+        if (previousField != null) {
+          if (">".equals(operator) || "<".equals(operator)) {
+            _currentClause.appendLiteral("OR");
+            _currentClause.append(" (");
+            _currentClause.append(getSelectionForComparisonWith(suffix, date, previousField));
+            _currentClause.appendLiteral("=");
+            _currentClause.appendParameter(
+              getParameterName(parameterName, previousField),
+              date.get(previousField)
+            );
+            _currentClause.appendLiteral("AND");
+            parenthesisToClose += 1;
+          } else if (">=".equals(operator) || "<=".equals(operator)) {
+            _currentClause.appendLiteral("AND");
+            _currentClause.append(" (");
+            _currentClause.append(getSelectionForComparisonWith(suffix, date, previousField));
+            _currentClause.appendLiteral("!=");
+            _currentClause.appendParameter(
+              getParameterName(parameterName, previousField),
+              date.get(previousField)
+            );
+            _currentClause.appendLiteral("OR");
+            parenthesisToClose += 1;
+          } else {
+            _currentClause.appendLiteral("AND");
+          }
+        }
+
+        _currentClause.appendLiteral(getSelectionForComparisonWith(suffix, date, field));
+        _currentClause.appendLiteral(operator);
+        _currentClause.appendParameter(getParameterName(parameterName, field), date.get(field));
+
+        previousField = field;
       }
 
-      for (@NonNull final ChronoField field : fields) {
-        if (first) first = false;
-        else _currentClause.appendLiteral("AND");
-
-        _currentClause.appendLiteral("(");
-        _currentClause.append(JPQLDateTimeSelector.select(field, ":this.lower"));
-        _currentClause.appendLiteral(operator);
-        _currentClause.appendParameter("value_" + field.toString().toLowerCase(), field.getFrom(date));
-        _currentClause.appendLiteral("OR");
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, ":this.upper"));
-        _currentClause.appendLiteral(operator);
-        _currentClause.appendParameter("value_" + field.toString().toLowerCase());
+      while (parenthesisToClose-- > 0) {
         _currentClause.append(")");
       }
     }
   }
 
-  private void exitEquality (@NonNull final PartialZonedDateTime date) {
-    boolean first = true;
+  private @NonNull String getParameterName (
+    @NonNull final String prefix,
+    @NonNull final ChronoField field
+  ) {
+    return prefix + "_" + field.toString().toLowerCase();
+  }
 
-    if (date.isDate() || date.isTime()) {
-      _currentClause.appendLiteral(asComparable(":this.lower", date));
-      _currentClause.appendLiteral("<=");
-      _currentClause.appendParameter("value", formatFull(date));
-      _currentClause.appendLiteral("AND");
-      _currentClause.appendLiteral(asComparable(":this.upper", date));
-      _currentClause.appendLiteral(">=");
-      _currentClause.appendParameter("value");
+  private @NonNull String getSelectionForComparisonWith (
+    @NonNull final String suffix,
+    @NonNull final PartialDate date,
+    @NonNull final ChronoField field
+  ) {
+    return JPQLDateTimeSelector.select(
+      field,
+      JPQLDateTimeSelector.zone(_currentClause.self() + "." + suffix, date.getZone())
+    );
+  }
 
-      first = false;
-    }
-
-    if (date.isPartial()) {
-      @NonNull final Iterable<ChronoField> fields;
-
-      if (first) {
-        fields = date.fields();
-      } else {
-        fields = date.isPartialDate() ? date.dateFields() : date.timeFields();
-      }
-
-      for (@NonNull final ChronoField field : fields) {
-        if (first) first = false;
-        else _currentClause.appendLiteral("AND");
-
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, ":this.lower"));
-        _currentClause.appendLiteral("<=");
-        _currentClause.appendParameter("value_" + field.toString().toLowerCase(), field.getFrom(date));
-        _currentClause.appendLiteral("AND");
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, ":this.upper"));
-        _currentClause.appendLiteral(">=");
-        _currentClause.appendParameter("value_" + field.toString().toLowerCase());
-      }
+  private @NonNull String toValueForPlainComparison (@NonNull final PartialDate date) {
+    if (date.supportsDateTime()) {
+      return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(date);
+    } else if (date.supportsDate()) {
+      return DateTimeFormatter.ISO_LOCAL_DATE.format(date);
+    } else {
+      return DateTimeFormatter.ISO_LOCAL_TIME.format(date);
     }
   }
 
-  private @NonNull String asComparable (@NonNull final String expression, @NonNull final PartialZonedDateTime date) {
-    if (date.isDateTime()) {
-      return expression;
-    } else if (date.isDate()) {
-      return JPQLDateTimeSelector.toDate(expression);
-    } else {
-      return JPQLDateTimeSelector.toTime(expression);
-    }
-  }
+  private @NonNull String getLiteralForPlainComparisonWith (
+    @NonNull final String suffix,
+    @NonNull final PartialDate date
+  ) {
+    @NonNull final String zonedSelf = JPQLDateTimeSelector.zone(
+      _currentClause.self() + "." + suffix,
+      date.getZone()
+    );
 
-  private @NonNull String formatFull (@NonNull final PartialZonedDateTime date) {
-    if (date.isDateTime()) {
-      return DateTimeFormatter.ISO_ZONED_DATE_TIME.format(date);
-    } else if (date.isDate()) {
-      return DateTimeFormatter.ISO_DATE.format(date);
+    if (date.supportsDateTime()) {
+      return zonedSelf;
+    } else if (date.supportsDate()) {
+      return JPQLDateTimeSelector.toDate(zonedSelf);
     } else {
-      return DateTimeFormatter.ISO_TIME.format(date);
+      return JPQLDateTimeSelector.toTime(zonedSelf);
     }
   }
 
@@ -248,65 +262,38 @@ public class DateTimeInRangeJPQLSelectionTranspiler
   }
 
   @Override
-  public void exitRange (
-    final DateSelectionParser.@NonNull RangeContext context
-  )
-  {
-    @NonNull final DateTimeFormatter    format = getFormatFrom(context.format(), getLocaleFrom(context.locale()));
-    @NonNull final PartialZonedDateTime left   = PartialZonedDateTime.from(format, getTokenContent(context.left));
-    @NonNull final PartialZonedDateTime right  = PartialZonedDateTime.from(format, getTokenContent(context.right));
+  public void exitRange (final DateSelectionParser.@NonNull RangeContext context) {
+    @NonNull final DateTimeFormatter format = getFormatFrom(
+      context.format(),
+      getLocaleFrom(context.locale())
+    );
+    @NonNull final PartialDate       left   = PartialDate.from(
+      format,
+      getTokenContent(context.left)
+    );
+    @NonNull final PartialDate       right  = PartialDate.from(
+      format,
+      getTokenContent(context.right)
+    );
 
     appendBetween(Utils.min(left, right), Utils.max(left, right));
   }
 
   private void appendBetween (
-    @NonNull final PartialZonedDateTime min, @NonNull final PartialZonedDateTime max
-  )
-  {
-    boolean first = true;
-
-    if (min.isDate() || min.isTime()) {
-      _currentClause.appendLiteral(asComparable(":this.lower", min));
-      _currentClause.appendLiteral("<=");
-      _currentClause.appendParameter("max", formatFull(max));
-      _currentClause.appendLiteral("AND");
-      _currentClause.appendLiteral(asComparable(":this.upper", min));
-      _currentClause.appendLiteral(">=");
-      _currentClause.appendParameter("min", formatFull(min));
-
-      first = false;
-    }
-
-    if (min.isPartial()) {
-      @NonNull final Iterable<ChronoField> fields;
-
-      if (first) {
-        fields = min.fields();
-      } else {
-        fields = min.isPartialDate() ? min.dateFields() : min.timeFields();
-      }
-
-      for (@NonNull final ChronoField field : fields) {
-        if (first) first = false;
-        else _currentClause.appendLiteral("AND");
-
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, ":this.lower"));
-        _currentClause.appendLiteral("<=");
-        _currentClause.appendParameter("max_" + field.toString().toLowerCase(), field.getFrom(max));
-        _currentClause.appendLiteral("AND");
-        _currentClause.appendLiteral(JPQLDateTimeSelector.select(field, ":this.upper"));
-        _currentClause.appendLiteral(">=");
-        _currentClause.appendParameter("min_" + field.toString().toLowerCase(), field.getFrom(min));
-      }
-    }
+    @NonNull final PartialDate min,
+    @NonNull final PartialDate max
+  ) {
+    appendOperation("lower", "<=", max, "max");
+    _currentClause.appendLiteral("AND");
+    appendOperation("upper", ">=", min, "min");
   }
 
-  private @NonNull PartialZonedDateTime parseDate (final DateSelectionParser.@NonNull DateContext date) {
+  private @NonNull PartialDate parseDate (final DateSelectionParser.@NonNull DateContext date) {
     try {
       @NonNull final DateTimeFormatter format = getFormatFrom(date.format(), getLocaleFrom(date.locale()));
       @NonNull final String            value  = getTokenContent(date.value);
 
-      return PartialZonedDateTime.from(format, value);
+      return PartialDate.from(format, value);
     } catch (@NonNull final Throwable exception) {
       throw new Error(String.join(
         "",

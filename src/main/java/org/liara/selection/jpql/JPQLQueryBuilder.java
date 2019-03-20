@@ -61,7 +61,14 @@ public class JPQLQueryBuilder
       _filter.append(" AND ");
     }
 
-    _filter.append(clause);
+    if (clause.contains(" OR ")) {
+      _filter.append('(');
+      _filter.append(clause);
+      _filter.append(')');
+    } else {
+      _filter.append(clause);
+    }
+
     _clauses++;
   }
 
@@ -92,10 +99,6 @@ public class JPQLQueryBuilder
   public @NonNull JPQLQuery build () {
     @NonNull final String selection = _selection.toString();
 
-    if (selection.contains(" OR ")) {
-      return new JPQLQuery("(" + selection + ")", _parameters);
-    } else {
-      return new JPQLQuery(selection, _parameters);
-    }
+    return new JPQLQuery(selection, _parameters);
   }
 }

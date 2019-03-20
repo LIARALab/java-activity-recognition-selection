@@ -147,9 +147,9 @@ class StringJPQLSelectionTranspilerSpecification
     then: "we expect it to be able to transpile the disjunction"
     result.clause == String.join(
       "",
-      "((:this LIKE :clause_0_keyword) OR ",
+      "(:this LIKE :clause_0_keyword) OR ",
       "(function('regexp', :this, :clause_1_expression) = 1 ",
-      "AND NOT (:this LIKE :clause_2_keyword)))"
+      "AND NOT (:this LIKE :clause_2_keyword))"
     )
 
     result.parameters == [
