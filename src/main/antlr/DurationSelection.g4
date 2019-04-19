@@ -1,9 +1,8 @@
 grammar DurationSelection;
 
-WHITESPACE: [ \n\r\t];
 NOT: 'not:';
-DELTA: '+-' | ':delta:' | ':dt:';
 NUMBER: ('+'|'-')? ('0'..'9')+;
+DELTA: '+-' | ':delta:' | ':dt:';
 NEAR: 'near:';
 EQUAL: 'eq:';
 GREATHER_THAN: 'gt:';
@@ -16,9 +15,9 @@ MONTH: ('M' | 'month' | 'months');
 WEEK: ('w' | 'week' | 'weeks');
 DAY: ('d' | 'day' | 'days');
 HOUR: ('h' | 'hour' | 'hours');
+MILLISECOND: ('ms' | 'millisecond' | 'milliseconds');
 MINUTE: ('m' | 'minute' | 'minutes');
 SECOND: ('s' | 'second' | 'seconds');
-MILLISECOND: ('ms' | 'millisecond' | 'milliseconds');
 
 selection: filter (';' filter)* EOF;
 

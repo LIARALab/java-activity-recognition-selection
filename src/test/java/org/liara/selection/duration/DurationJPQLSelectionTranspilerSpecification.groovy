@@ -35,12 +35,12 @@ class DurationJPQLSelectionTranspilerSpecification
     final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
 
     when: "we try to transpile a greater than clause"
-    final JPQLQuery result = transpiler.transpile("gt:1year+2day-3minutes")
+    final JPQLQuery result = transpiler.transpile("gt:1y")
 
     then: " we expect the transpiler to be able to transpile the greater than clause"
     result.clause == "(:this > :clause_0_value)"
     result.parameters == [
-      "clause_0_value": Duration.ofDays(365).plusDays(2).minusMinutes(3).toMillis()
+      "clause_0_value": Duration.ofDays(365).toMillis()
     ]
   }
 

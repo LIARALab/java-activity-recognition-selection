@@ -168,7 +168,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
     )
 
     then: "we expect the transpiler to be able to transpile the conjunction of clauses"
-    result.clause == "NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value) AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_1_value AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_2_value"
+    result.clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value) AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_1_value AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_2_value)"
     result.parameters == [
       "clause_0_value": '2018-12-10T15:20:30',
       "clause_1_value": '2018-12-20T15:20:30',
