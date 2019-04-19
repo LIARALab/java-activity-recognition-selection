@@ -38,9 +38,9 @@ operation: date
          | name=LESS_THAN_OR_EQUAL date
          ;
 
-range: locale? format? left=TOKEN RANGE right=TOKEN;
+range: (locale? format?) | (format? locale?) left=TOKEN RANGE right=TOKEN;
 
-date: locale? format? value=TOKEN;
+date: (locale? format?) | (format? locale?) value=TOKEN;
 
 locale: LOCALE TOKEN;
 

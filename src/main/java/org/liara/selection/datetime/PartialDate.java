@@ -175,7 +175,7 @@ public class PartialDate
   }
 
   public @NonNull ZoneId getZone () {
-    return Optional.ofNullable(_rawDate.query(TemporalQueries.zone()))
+    return Optional.ofNullable(_rawDate.query(TemporalQueries.zoneId()))
              .orElseGet(ZoneId::systemDefault);
   }
 
