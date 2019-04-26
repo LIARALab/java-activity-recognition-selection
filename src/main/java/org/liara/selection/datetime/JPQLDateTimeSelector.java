@@ -187,6 +187,11 @@ public final class JPQLDateTimeSelector
     return "YEAR(:expression)".replaceAll(":expression", expression);
   }
 
+  @Factory(ChronoField.YEAR_OF_ERA)
+  public static @NonNull String selectYearOfEra (@NonNull final String expression) {
+    return "YEAR(:expression)".replaceAll(":expression", expression);
+  }
+
   @Retention(RetentionPolicy.RUNTIME)
   private @interface Factory
   {

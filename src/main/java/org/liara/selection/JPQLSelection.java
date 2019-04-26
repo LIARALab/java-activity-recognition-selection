@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 package org.liara.selection;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.selection.bool.BooleanJPQLSelectionTranspiler;
 import org.liara.selection.datetime.DateTimeInRangeJPQLSelectionTranspiler;
 import org.liara.selection.datetime.DateTimeJPQLSelectionTranspiler;
 import org.liara.selection.duration.DurationJPQLSelectionTranspiler;
@@ -74,6 +75,10 @@ public final class JPQLSelection
 
   public static @NonNull JPQLSelectionTranspiler datetimeTranspiler () {
     return new DateTimeJPQLSelectionTranspiler();
+  }
+
+  public static @NonNull JPQLSelectionTranspiler booleanTranspiler () {
+    return new BooleanJPQLSelectionTranspiler();
   }
 
   public static @NonNull JPQLSelectionTranspiler datetimeInRangeTranspiler () {
