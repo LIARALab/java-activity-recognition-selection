@@ -91,6 +91,12 @@ public class BooleanJPQLSelectionTranspiler
   }
 
   public @NonNull JPQLQuery transpile (@NonNull final CharSequence expression) {
+    if (expression.toString().trim().equalsIgnoreCase("")) {
+      @NonNull final JPQLQueryBuilder builder = new JPQLQueryBuilder();
+      builder.appendClause(":this = true");
+      return builder.build();
+    }
+
     @NonNull final BooleanSelectionLexer lexer = (
       new BooleanSelectionLexer(CharStreams.fromString(expression.toString()))
     );
@@ -106,6 +112,12 @@ public class BooleanJPQLSelectionTranspiler
 
   public @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
   throws TranspilationException {
+    if (expression.toString().trim().equalsIgnoreCase("")) {
+      @NonNull final JPQLQueryBuilder builder = new JPQLQueryBuilder();
+      builder.appendClause(":this = true");
+      return builder.build();
+    }
+
     @NonNull final BooleanSelectionLexer lexer = (
       new BooleanSelectionLexer(CharStreams.fromString(expression.toString()))
     );
