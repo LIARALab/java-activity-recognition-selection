@@ -92,9 +92,7 @@ public class BooleanJPQLSelectionTranspiler
 
   public @NonNull JPQLQuery transpile (@NonNull final CharSequence expression) {
     if (expression.toString().trim().equalsIgnoreCase("")) {
-      @NonNull final JPQLQueryBuilder builder = new JPQLQueryBuilder();
-      builder.appendClause(":this = true");
-      return builder.build();
+      return defaultJPQLQuery();
     }
 
     @NonNull final BooleanSelectionLexer lexer = (
@@ -113,9 +111,7 @@ public class BooleanJPQLSelectionTranspiler
   public @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
   throws TranspilationException {
     if (expression.toString().trim().equalsIgnoreCase("")) {
-      @NonNull final JPQLQueryBuilder builder = new JPQLQueryBuilder();
-      builder.appendClause(":this = true");
-      return builder.build();
+      return defaultJPQLQuery();
     }
 
     @NonNull final BooleanSelectionLexer lexer = (
@@ -132,5 +128,12 @@ public class BooleanJPQLSelectionTranspiler
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 
     return _currentSelection.build();
+  }
+
+  private @NonNull JPQLQuery defaultJPQLQuery () {
+    @NonNull final JPQLQueryBuilder builder = new JPQLQueryBuilder();
+    builder.appendClause(":this = true");
+    builder.appendFilter();
+    return builder.build();
   }
 }

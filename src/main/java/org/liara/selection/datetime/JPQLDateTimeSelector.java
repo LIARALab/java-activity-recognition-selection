@@ -31,6 +31,8 @@ import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
+import java.time.temporal.IsoFields;
+import java.time.temporal.TemporalField;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -57,6 +59,19 @@ public final class JPQLDateTimeSelector
     JPQLDateTimeSelector.scanFactoriesIfNecessary();
 
     return JPQLDateTimeSelector.FACTORIES.containsKey(field);
+  }
+
+  public static @NonNull String select (
+    @NonNull final TemporalField field,
+    @NonNull final String expression
+  ) {
+    if (field instanceof ChronoField) {
+      return select((ChronoField) field, expression);
+    } else if (field == IsoFields.WEEK_BASED_YEAR) {
+      return selectWeekBasedYear(expression);
+    } else {
+      throw new InvalidParameterException("Unhandled field type : " + field);
+    }
   }
 
   public static @NonNull String select (
@@ -189,6 +204,10 @@ public final class JPQLDateTimeSelector
 
   @Factory(ChronoField.YEAR_OF_ERA)
   public static @NonNull String selectYearOfEra (@NonNull final String expression) {
+    return "YEAR(:expression)".replaceAll(":expression", expression);
+  }
+
+  public static @NonNull String selectWeekBasedYear (@NonNull final String expression) {
     return "YEAR(:expression)".replaceAll(":expression", expression);
   }
 

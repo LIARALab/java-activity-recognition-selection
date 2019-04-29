@@ -101,7 +101,10 @@ public class PartialDate
   }
 
   public boolean supportsYearBasedDate () {
-    return supportsAny(ChronoField.YEAR, ChronoField.YEAR_OF_ERA) && supportsDayOfYear();
+    return supportsAny(
+      ChronoField.YEAR,
+      ChronoField.YEAR_OF_ERA
+    ) && supportsDayOfYear();
   }
 
   public boolean supportsDayOfYear () {
@@ -131,15 +134,15 @@ public class PartialDate
     );
   }
 
-  public boolean supports (@NonNull final ChronoField... fields) {
-    for (@NonNull final ChronoField field : fields) {
+  public boolean supports (@NonNull final TemporalField... fields) {
+    for (@NonNull final TemporalField field : fields) {
       if (!_rawDate.isSupported(field)) return false;
     }
     return true;
   }
 
-  public boolean supportsAny (@NonNull final ChronoField... fields) {
-    for (@NonNull final ChronoField field : fields) {
+  public boolean supportsAny (@NonNull final TemporalField... fields) {
+    for (@NonNull final TemporalField field : fields) {
       if (_rawDate.isSupported(field)) return true;
     }
     return false;
