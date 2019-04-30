@@ -25,6 +25,9 @@ package org.liara.selection.datetime
 import org.liara.selection.jpql.JPQLQuery
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+import java.time.ZoneId
+
 class DatetimeJPQLSelectionTranspilerSpecification
   extends Specification {
 
@@ -42,7 +45,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: " we expect the transpiler to be able to transpile the greater than clause"
     result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_0_value)"
     result.parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -56,7 +59,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: " we expect the transpiler to be able to transpile the greater than or equal clause"
     result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') >= :clause_0_value)"
     result.parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -70,7 +73,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: " we expect the transpiler to be able to transpile the less than clause"
     result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_0_value)"
     result.parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -84,7 +87,7 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: " we expect the transpiler to be able to transpile the less than or equal clause"
     result.clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') <= :clause_0_value)"
     result.parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -146,14 +149,14 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: " we expect the transpiler to be able to transpile the less than or equal clause"
     results[0].clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value))"
     results[0].parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
     results[
       1
     ].clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') >= :clause_0_min AND CONVERT_TZ(:this, 'UTC', 'America/New_York') <= :clause_0_max))"
     results[1].parameters == [
-      "clause_0_min": '2018-12-16T11:20:30',
-      "clause_0_max": '2018-12-16T18:10:20'
+      "clause_0_min": LocalDateTime.parse('2018-12-16T11:20:30').atZone(ZoneId.of("UTC")),
+      "clause_0_max": LocalDateTime.parse('2018-12-16T18:10:20').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -163,16 +166,17 @@ class DatetimeJPQLSelectionTranspilerSpecification
 
     when: "we try to transpile a conjunction of clauses"
     final JPQLQuery result = transpiler.transpile(
-      "not:eq:(2018-12-10T15:20:30+01:00[Europe/Paris]),lt:(2018-12-20T15:20:30+01:00[Europe/Paris])," +
+      "not:eq:(2018-12-10T15:20:30+01:00[Europe/Paris])," +
+        "lt:(2018-12-20T15:20:30+01:00[Europe/Paris])," +
         "gt:(2018-12-03T15:20:30+01:00[Europe/Paris])"
     )
 
     then: "we expect the transpiler to be able to transpile the conjunction of clauses"
     result.clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value) AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_1_value AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_2_value)"
     result.parameters == [
-      "clause_0_value": '2018-12-10T15:20:30',
-      "clause_1_value": '2018-12-20T15:20:30',
-      "clause_2_value": '2018-12-03T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC")),
+      "clause_1_value": LocalDateTime.parse('2018-12-20T15:20:30').atZone(ZoneId.of("UTC")),
+      "clause_2_value": LocalDateTime.parse('2018-12-03T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -189,9 +193,9 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: "we expect the transpiler to be able to transpile the disjunction of clauses"
     result.clause == "(NOT (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value) AND CONVERT_TZ(:this, 'UTC', 'Europe/Paris') < :clause_1_value) OR (CONVERT_TZ(:this, 'UTC', 'Europe/Paris') > :clause_2_value)"
     result.parameters == [
-      "clause_0_value": '2018-12-10T15:20:30',
-      "clause_1_value": '2018-12-20T15:20:30',
-      "clause_2_value": '2018-12-03T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC")),
+      "clause_1_value": LocalDateTime.parse('2018-12-20T15:20:30').atZone(ZoneId.of("UTC")),
+      "clause_2_value": LocalDateTime.parse('2018-12-03T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
@@ -208,12 +212,12 @@ class DatetimeJPQLSelectionTranspilerSpecification
     then: "we expect the transpiler to be able to transpile the datetime"
     result[0].clause == "(CONVERT_TZ(:this, 'UTC', 'Europe/Paris') = :clause_0_value)"
     result[0].parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
 
     result[1].clause == "(:this = :clause_0_value)"
     result[1].parameters == [
-      "clause_0_value": '2018-12-10T15:20:30'
+      "clause_0_value": LocalDateTime.parse('2018-12-10T15:20:30').atZone(ZoneId.of("UTC"))
     ]
   }
 
