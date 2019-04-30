@@ -39,6 +39,8 @@ import org.liara.selection.jpql.JPQLQuery;
 import org.liara.selection.jpql.JPQLQueryBuilder;
 import org.liara.selection.jpql.JPQLSelectionTranspiler;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -194,9 +196,9 @@ public class DateTimeJPQLSelectionTranspiler
     );
   }
 
-  private @NonNull String toValueForPlainComparison (@NonNull final PartialDate date) {
+  private @NonNull Object toValueForPlainComparison (@NonNull final PartialDate date) {
     if (date.supportsDateTime()) {
-      return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(date);
+      return LocalDateTime.from(date).atZone(ZoneId.of("UTC"));
     } else if (date.supportsDate()) {
       return DateTimeFormatter.ISO_LOCAL_DATE.format(date);
     } else {
@@ -237,25 +239,20 @@ public class DateTimeJPQLSelectionTranspiler
   }
 
   @Override
-  public void exitRange (
-    final DateSelectionParser.@NonNull RangeContext context
-  )
-  {
-    @NonNull final DateTimeFormatter format = getFormatFrom(
-      context.format(),
-      getLocaleFrom(context.locale())
-    );
-    @NonNull final PartialDate       left   = PartialDate.from(
-      format,
-      getTokenContent(context.left)
-    );
-    @NonNull final PartialDate       right  = PartialDate.from(
-      format,
-      getTokenContent(context.right)
+  public void exitRange (final DateSelectionParser.@NonNull RangeContext context) {
+    @NonNull final DateTimeFormatter format = (
+      getFormatFrom(context.format(), getLocaleFrom(context.locale()))
     );
 
-    appendBetween(Utils.min(left, right), Utils.max(left, right)
+    @NonNull final PartialDate left = (
+      PartialDate.from(format, getTokenContent(context.left))
     );
+
+    @NonNull final PartialDate right = (
+      PartialDate.from(format, getTokenContent(context.right))
+    );
+
+    appendBetween(Utils.min(left, right), Utils.max(left, right));
   }
 
   private void appendBetween (@NonNull final PartialDate min, @NonNull final PartialDate max) {
@@ -266,37 +263,35 @@ public class DateTimeJPQLSelectionTranspiler
 
   private @NonNull PartialDate parseDate (final DateSelectionParser.@NonNull DateContext date) {
     try {
-      @NonNull final DateTimeFormatter format = getFormatFrom(date.format(),
-        getLocaleFrom(date.locale()));
+      @NonNull final DateTimeFormatter format = (
+        getFormatFrom(date.format(), getLocaleFrom(date.locale()))
+      );
+
       @NonNull final String            value  = getTokenContent(date.value);
 
       return PartialDate.from(format, value);
     } catch (@NonNull final Throwable exception) {
-      throw new Error(String.join("",
-                                  "Invalid date at line ",
-                                  String.valueOf(date.getStart().getLine()),
-                                  " and index ",
-                                  String.valueOf(date.getStart().getCharPositionInLine()),
-                                  " : \"",
-                                  date.getText(),
-                                  "\""
-      ), exception);
+      throw new Error(
+        "Invalid date at line " + String.valueOf(date.getStart().getLine()) + " and index " +
+        String.valueOf(date.getStart().getCharPositionInLine()) + " : \"" + date.getText() + "\"",
+        exception
+      );
     }
   }
 
   private @NonNull DateTimeFormatter getFormatFrom (
-    final DateSelectionParser.@Nullable FormatContext format, @NonNull final Locale locale
-  )
-  {
-    return (format == null) ? _defaultFormat.withLocale(locale) : new DateTimeFormatterBuilder().parseStrict()
-                                                                                                .appendPattern(
-                                                                                                  getTokenContent(format
-                                                                                                                    .TOKEN()))
-                                                                                                .toFormatter(locale);
+    final DateSelectionParser.@Nullable FormatContext format,
+    @NonNull final Locale locale
+  ) {
+    return format == null ? _defaultFormat.withLocale(locale) : (
+      new DateTimeFormatterBuilder().parseStrict()
+        .appendPattern(getTokenContent(format.TOKEN()))
+        .toFormatter(locale)
+    );
   }
 
   private @NonNull Locale getLocaleFrom (final DateSelectionParser.@Nullable LocaleContext locale) {
-    return (locale == null) ? _defaultLocale : Locale.forLanguageTag(getTokenContent(locale.TOKEN()));
+    return locale == null ? _defaultLocale : Locale.forLanguageTag(getTokenContent(locale.TOKEN()));
   }
 
   private @NonNull String getTokenContent (@NonNull final TerminalNode node) {
@@ -310,9 +305,13 @@ public class DateTimeJPQLSelectionTranspiler
   }
 
   public @NonNull JPQLQuery transpile (@NonNull final CharSequence expression) {
-    @NonNull final DateSelectionLexer lexer = new DateSelectionLexer(CharStreams.fromString(expression.toString()));
+    @NonNull final DateSelectionLexer lexer = (
+      new DateSelectionLexer(CharStreams.fromString(expression.toString()))
+    );
 
-    @NonNull final DateSelectionParser parser = new DateSelectionParser(new CommonTokenStream(lexer));
+    @NonNull final DateSelectionParser parser = (
+      new DateSelectionParser(new CommonTokenStream(lexer))
+    );
 
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());
 
@@ -322,9 +321,15 @@ public class DateTimeJPQLSelectionTranspiler
   public @NonNull JPQLQuery tryToTranspile (@NonNull final CharSequence expression)
   throws TranspilationException
   {
-    @NonNull final DateSelectionLexer lexer = new DateSelectionLexer(CharStreams.fromString(expression.toString()));
+    @NonNull final DateSelectionLexer lexer = (
+      new DateSelectionLexer(CharStreams.fromString(expression.toString()))
+    );
+
+    @NonNull final DateSelectionParser parser = (
+      new DateSelectionParser(new CommonTokenStream(lexer))
+    );
+
     lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
-    @NonNull final DateSelectionParser parser = new DateSelectionParser(new CommonTokenStream(lexer));
     parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
     ParseTreeWalker.DEFAULT.walk(this, parser.selection());

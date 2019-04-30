@@ -236,7 +236,7 @@ class DatetimeInRangeJPQLSelectionTranspilerSpecification
 
     when: "we try to transpile a filter"
     final JPQLQuery query = transpiler.transpile(
-      "format:(yyyy-MM-dd'T'HH:mm:ss'['VV']')(2019-04-26T07:20:00[America/New_York]):(2019-04-26T13:40:00[America/New_York])"
+      "format:(yyyy-MM-dd'T'HH:mm:ss'['VV']')(2019-04-26T07:40:00[America/New_York]):(2019-04-26T13:40:00[America/New_York])"
     )
 
     then: "we expect the transpiler to be able to transpile the given filter"
@@ -244,7 +244,7 @@ class DatetimeInRangeJPQLSelectionTranspilerSpecification
 
     query.parameters == [
       "clause_0_max": "2019-04-26T13:40:00",
-      "clause_0_min": "2019-04-26T07:20:00"
+      "clause_0_min": "2019-04-26T07:40:00"
     ]
   }
 
