@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ class IntegerJPQLSelectionTranspilerSpecification
   extends Specification {
   def "it can parse integer values" () {
     given: "a transpiler"
-    final IntegerJPQLSelectionTranspiler transpiler = new IntegerJPQLSelectionTranspiler()
+    final IntegerSelectionToExpressionCompiler transpiler = new IntegerSelectionToExpressionCompiler()
 
     expect: "it to be able to parse integer values"
     transpiler.transpile("gt:5.689").clause == "(:this > :clause_0_value)"
@@ -43,7 +43,7 @@ class IntegerJPQLSelectionTranspilerSpecification
   }
   def "it can add and subtract integer values" () {
     given: "a transpiler"
-    final IntegerJPQLSelectionTranspiler transpiler = new IntegerJPQLSelectionTranspiler()
+    final IntegerSelectionToExpressionCompiler transpiler = new IntegerSelectionToExpressionCompiler()
 
     expect: "it to be able to add and subtract integer values"
     transpiler.transpile("near:5.56+-3.15").clause == "(:this BETWEEN :clause_0_min AND :clause_0_max)"
@@ -55,7 +55,7 @@ class IntegerJPQLSelectionTranspilerSpecification
 
   def "it throw an error if the value is out of range" () {
     given: "a transpiler"
-    final IntegerJPQLSelectionTranspiler transpiler = new IntegerJPQLSelectionTranspiler()
+    final IntegerSelectionToExpressionCompiler transpiler = new IntegerSelectionToExpressionCompiler()
 
     when: "we try to parse a value out of range"
     transpiler.transpile("gt:54879656847986879.689")

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,43 @@ package org.liara.selection.natural;
 
 import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.data.primitive.Primitives;
 
-public class LongJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<Long>
-{
-  @Override
-  protected @NonNull Long parse (@NonNull final Token token) {
-    try {
-      return Long.parseLong(token.getText().replaceFirst("\\.[0-9]+", ""));
-    } catch (@NonNull final NumberFormatException exception) {
-      throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
-      );
-    }
+public class IntegerSelectionToExpressionCompiler
+    extends NumberSelectionToExpressionCompiler<Integer> {
+
+  public IntegerSelectionToExpressionCompiler() {
+    super(Primitives.INTEGER);
   }
 
   @Override
-  protected @NonNull Long add (
-    @NonNull final Long left,
-    @NonNull final Long right
-  ) { return left + right; }
+  protected @NonNull Integer add(
+      @NonNull final Integer left,
+      @NonNull final Integer right
+  ) {
+    return left + right;
+  }
 
   @Override
-  protected @NonNull Long subtract (
-    @NonNull final Long left,
-    @NonNull final Long right
-  ) { return left - right; }
+  protected @NonNull Integer subtract(
+      @NonNull final Integer left,
+      @NonNull final Integer right
+  ) {
+    return left - right;
+  }
+
+  @Override
+  protected @NonNull Integer parse(@NonNull final Token token) {
+    try {
+      return Integer.parseInt(token.getText().replaceFirst("\\.[0-9]+", ""));
+    } catch (@NonNull final NumberFormatException exception) {
+      throw new Error(
+          String.join("",
+              "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
+              String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
+          ),
+          exception
+      );
+    }
+  }
 }

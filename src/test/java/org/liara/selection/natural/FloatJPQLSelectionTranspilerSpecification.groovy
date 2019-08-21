@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ class FloatJPQLSelectionTranspilerSpecification
   extends Specification {
   def "it can parse float values" () {
     given: "a transpiler"
-    final FloatJPQLSelectionTranspiler transpiler = new FloatJPQLSelectionTranspiler()
+    final FloatSelectionToExpressionCompiler transpiler = new FloatSelectionToExpressionCompiler()
 
     expect: "it to be able to parse float values"
     transpiler.transpile("gt:5.689").clause == "(:this > :clause_0_value)"
@@ -41,9 +41,10 @@ class FloatJPQLSelectionTranspilerSpecification
       "clause_0_value": -107.487f
     ]
   }
+
   def "it can add and subtract float values" () {
     given: "a transpiler"
-    final FloatJPQLSelectionTranspiler transpiler = new FloatJPQLSelectionTranspiler()
+    final FloatSelectionToExpressionCompiler transpiler = new FloatSelectionToExpressionCompiler()
 
     expect: "it to be able to add and subtract float values"
     transpiler.transpile("near:5.56+-3.15").clause == "(:this BETWEEN :clause_0_min AND :clause_0_max)"

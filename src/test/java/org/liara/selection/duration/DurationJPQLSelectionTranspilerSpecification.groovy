@@ -32,7 +32,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile greater than clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a greater than clause"
     final JPQLQuery result = transpiler.transpile("gt:1y")
@@ -46,7 +46,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile greater than or equal clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a greater than or equal clause"
     final JPQLQuery result = transpiler.transpile("gte:1year+2day-3minutes")
@@ -60,7 +60,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile less than clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a less than clause"
     final JPQLQuery result = transpiler.transpile("lt:1year+2day-3minutes")
@@ -74,7 +74,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile less than or equal clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a less than or equal clause"
     final JPQLQuery result = transpiler.transpile("lte:1year+2day-3minutes")
@@ -88,7 +88,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile equal clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile an equal clause"
     final JPQLQuery[] results = [
@@ -107,7 +107,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile range clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a range clause"
     final JPQLQuery[] results = [
@@ -129,7 +129,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile near clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a near clause"
     final JPQLQuery[] results = [
@@ -150,7 +150,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile negated clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a negated clause"
     final JPQLQuery result = transpiler.transpile("not:near:5days+-2hours")
@@ -165,7 +165,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile conjunction of clauses" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a conjunction of clause"
     final JPQLQuery result = transpiler.transpile("gt:5days,lte:3years,not:10days:20days")
@@ -188,7 +188,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile disjunction of conjunctions" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a disjunction of conjunctions"
     final JPQLQuery result = transpiler.transpile("gt:5days;lte:3years,not:10days:20days;10years")
@@ -213,7 +213,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile durations" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile durations"
     final Map<Duration, JPQLQuery[]> results = [
@@ -269,7 +269,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it can transpile complex durations" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile complex durations"
     final JPQLQuery result = transpiler.transpile("1month-20day3d+3hours-1year+6349874698hours")
@@ -285,7 +285,7 @@ class DurationJPQLSelectionTranspilerSpecification
 
   def "it throw an error if you use an invalid long value before a duration type" () {
     given: "a transpiler"
-    final DurationJPQLSelectionTranspiler transpiler = new DurationJPQLSelectionTranspiler()
+    final DurationSelectionToExpressionCompiler transpiler = new DurationSelectionToExpressionCompiler()
 
     when: "we try to transpile a duration with an invalid long"
     final JPQLQuery result = transpiler.transpile("15489789465135668798731687984649846535498765months")

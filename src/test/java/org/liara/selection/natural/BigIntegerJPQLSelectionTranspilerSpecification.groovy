@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ class BigIntegerJPQLSelectionTranspilerSpecification
   extends Specification {
   def "it can parse big integer values" () {
     given: "a transpiler"
-    final BigIntegerJPQLSelectionTranspiler transpiler = new BigIntegerJPQLSelectionTranspiler()
+    final BigIntegerSelectionToExpressionCompiler transpiler = new BigIntegerSelectionToExpressionCompiler()
 
     expect: "it to be able to parse big integer values"
     transpiler.transpile("gt:568764898798764867987.689").clause == "(:this > :clause_0_value)"
@@ -43,7 +43,7 @@ class BigIntegerJPQLSelectionTranspilerSpecification
   }
   def "it can add and subtract big integer values" () {
     given: "a transpiler"
-    final BigIntegerJPQLSelectionTranspiler transpiler = new BigIntegerJPQLSelectionTranspiler()
+    final BigIntegerSelectionToExpressionCompiler transpiler = new BigIntegerSelectionToExpressionCompiler()
 
     expect: "it to be able to add and subtract big integer values"
     transpiler.transpile("near:5.56+-3.15").clause == "(:this BETWEEN :clause_0_min AND :clause_0_max)"

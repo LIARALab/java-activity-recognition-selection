@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ plugins {
 }
 
 repositories {
+  mavenLocal()
   mavenCentral()
   jcenter()
 }
@@ -79,7 +80,7 @@ publishing {
   repositories {
     maven {
       url = version.endsWith('SNAPSHOT') ? "$buildDir/repos/snapshots"
-        : "$buildDir/repos/releases"
+                                         : "$buildDir/repos/releases"
     }
   }
 }
@@ -93,6 +94,7 @@ generateGrammarSource {
 dependencies {
   antlr "org.antlr:antlr4:4.7.1"
 
+  implementation group: 'org.liara', name: 'data', version: '0.1-SNAPSHOT'
   implementation group: 'org.checkerframework', name: 'checker', version: '2.5.4'
   implementation group: 'com.google.guava', name: 'guava', version: '26.0-jre'
 

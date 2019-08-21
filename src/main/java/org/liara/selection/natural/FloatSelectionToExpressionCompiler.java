@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,43 @@ package org.liara.selection.natural;
 
 import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.data.primitive.Primitives;
 
-public class   IntegerJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<Integer>
-{
-  @Override
-  protected @NonNull Integer add (
-    @NonNull final Integer left,
-    @NonNull final Integer right
-  ) { return left + right; }
+public class FloatSelectionToExpressionCompiler
+    extends NumberSelectionToExpressionCompiler<Float> {
 
-  @Override
-  protected @NonNull Integer subtract (
-    @NonNull final Integer left,
-    @NonNull final Integer right
-  ) { return left - right; }
+  public FloatSelectionToExpressionCompiler() {
+    super(Primitives.FLOAT);
+  }
 
   @Override
-  protected @NonNull Integer parse (@NonNull final Token token) {
+  protected @NonNull Float parse(@NonNull final Token token) {
     try {
-      return Integer.parseInt(token.getText().replaceFirst("\\.[0-9]+", ""));
+      return Float.parseFloat(token.getText());
     } catch (@NonNull final NumberFormatException exception) {
       throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
+          String.join("",
+              "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
+              String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
+          ),
+          exception
       );
     }
+  }
+
+  @Override
+  protected @NonNull Float add(
+      @NonNull final Float left,
+      @NonNull final Float right
+  ) {
+    return left + right;
+  }
+
+  @Override
+  protected @NonNull Float subtract(
+      @NonNull final Float left,
+      @NonNull final Float right
+  ) {
+    return left - right;
   }
 }

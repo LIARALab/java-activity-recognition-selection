@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,15 +22,14 @@
 
 package org.liara.selection.processor;
 
+import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.List;
+public interface Processor<Result> {
 
-public interface Processor<Result>
-{
-  default void configure (@NonNull final List<@NonNull Object> parameters) {
+  default void configure(@NonNull final List<@NonNull Object> parameters) {
 
   }
 
-  @NonNull Result execute (@NonNull final List<@NonNull Object> parameters);
+  @NonNull Result execute(@NonNull final List<@NonNull Object> parameters);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,43 @@ package org.liara.selection.natural;
 
 import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.data.primitive.Primitives;
 
-public class ShortJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<Short>
-{
+public class DoubleSelectionToExpressionCompiler
+    extends NumberSelectionToExpressionCompiler<Double> {
+
+  public DoubleSelectionToExpressionCompiler() {
+    super(Primitives.DOUBLE);
+  }
+
   @Override
-  protected @NonNull Short parse (@NonNull final Token token) {
+  protected @NonNull Double parse(@NonNull final Token token) {
     try {
-      return Short.parseShort(token.getText().replaceFirst("\\.[0-9]+", ""));
+      return Double.parseDouble(token.getText());
     } catch (@NonNull final NumberFormatException exception) {
       throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
+          String.join("",
+              "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
+              String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
+          ),
+          exception
       );
     }
   }
 
   @Override
-  protected @NonNull Short add (
-    @NonNull final Short left,
-    @NonNull final Short right
-  ) { return (short) (left + right); }
+  protected @NonNull Double add(
+      @NonNull final Double left,
+      @NonNull final Double right
+  ) {
+    return left + right;
+  }
 
   @Override
-  protected @NonNull Short subtract (
-    @NonNull final Short left,
-    @NonNull final Short right
-  ) { return (short) (left - right); }
+  protected @NonNull Double subtract(
+      @NonNull final Double left,
+      @NonNull final Double right
+  ) {
+    return left - right;
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,18 +24,18 @@ package org.liara.selection;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class Utils
-{
-  public static <Target extends Comparable<? super Target>> Target max (
-    @NonNull final Target a,
-    @NonNull final Target b
+public final class Utils {
+
+  public static <Target extends Comparable<? super Target>> Target max(
+      @NonNull final Target a,
+      @NonNull final Target b
   ) {
     return (a.compareTo(b) > 0) ? a : b;
   }
 
-  public static <Target extends Comparable<? super Target>> Target min (
-    @NonNull final Target a,
-    @NonNull final Target b
+  public static <Target extends Comparable<? super Target>> Target min(
+      @NonNull final Target a,
+      @NonNull final Target b
   ) {
     return (a.compareTo(b) < 0) ? a : b;
   }

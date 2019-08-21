@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,38 +20,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.liara.selection.natural;
+package org.liara.selection;
 
-import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.expression.Expression;
 
-public class FloatJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<Float>
-{
-  @Override
-  protected @NonNull Float parse (@NonNull final Token token) {
-    try {
-      return Float.parseFloat(token.getText());
-    } catch (@NonNull final NumberFormatException exception) {
-      throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
-      );
-    }
-  }
+public interface SelectionToExpressionCompiler {
 
-  @Override
-  protected @NonNull Float add (
-    @NonNull final Float left,
-    @NonNull final Float right
-  ) { return left + right; }
+  @NonNull Expression<@NonNull Boolean> transpile(@NonNull final CharSequence sequence);
 
-  @Override
-  protected @NonNull Float subtract (
-    @NonNull final Float left,
-    @NonNull final Float right
-  ) { return left - right; }
+  @NonNull Expression<@NonNull Boolean> tryToTranspile(@NonNull final CharSequence expression)
+      throws TranspilationException;
 }

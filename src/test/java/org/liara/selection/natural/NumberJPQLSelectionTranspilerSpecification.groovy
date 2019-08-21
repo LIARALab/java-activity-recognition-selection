@@ -28,8 +28,8 @@ import spock.lang.Specification
 
 class NumberJPQLSelectionTranspilerSpecification
   extends Specification {
-  NumberJPQLSelectionTranspiler<Double> createTranspiler() {
-    final NumberJPQLSelectionTranspiler<Double> transpiler = new NumberJPQLSelectionTranspiler<Double>() {
+    NumberSelectionToExpressionCompiler<Double> createTranspiler() {
+        final NumberSelectionToExpressionCompiler<Double> transpiler = new NumberSelectionToExpressionCompiler<Double>() {
       @Override
       protected Double parse(final Token token) {
         return Double.parseDouble(token.getText())
@@ -51,7 +51,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile greater than clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile greater than clauses"
     transpiler.transpile("gt:5.689").clause == "(:this > :clause_0_value)"
@@ -67,7 +67,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile greater than or equal clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile greater than or equal clauses"
     transpiler.transpile("gte:5.689") == JPQLQuery.query("(:this >= :clause_0_value)", [
@@ -81,7 +81,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile less than clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile less than clauses"
     transpiler.transpile("lt:5.689") == JPQLQuery.query("(:this < :clause_0_value)", [
@@ -95,7 +95,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile less than or equal clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile less than or equal clauses"
     transpiler.transpile("lte:5.689") == JPQLQuery.query("(:this <= :clause_0_value)", [
@@ -109,7 +109,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile equal clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile equal clauses"
     transpiler.transpile("eq:5.689") == JPQLQuery.query("(:this = :clause_0_value)", [
@@ -131,7 +131,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile range clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile range clauses"
     transpiler.transpile("5.689:62.489") == JPQLQuery.query(
@@ -153,7 +153,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile near clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile near clauses"
     transpiler.transpile("near:5.689+-62.489") == JPQLQuery.query(
@@ -191,7 +191,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile negated clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile negated clauses"
     transpiler.transpile("not:near:5.689+-62.489") == JPQLQuery.query(
@@ -205,7 +205,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile conjunction of clauses" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile conjunction of clauses"
     transpiler.transpile("not:gt:5.689,lt:3.56,lte:4.36") == JPQLQuery.query(
@@ -220,7 +220,7 @@ class NumberJPQLSelectionTranspilerSpecification
 
   def "it can transpile disjunction of conjunctions" () {
     given: "a transpiler"
-    final NumberJPQLSelectionTranspiler<Double> transpiler = createTranspiler()
+    final NumberSelectionToExpressionCompiler<Double> transpiler = createTranspiler()
 
     expect: "it to be able to transpile disjunction of conjunctions"
     transpiler.transpile("not:gt:5.689,lt:3.56;lte:4.36") == JPQLQuery.query(

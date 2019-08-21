@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,36 +24,43 @@ package org.liara.selection.natural;
 
 import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.data.primitive.Primitives;
 
-import java.math.BigInteger;
+public class ByteSelectionToExpressionCompiler
+    extends NumberSelectionToExpressionCompiler<Byte> {
 
-public class   BigIntegerJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<BigInteger>
-{
-  @Override
-  protected @NonNull BigInteger add (
-    @NonNull final BigInteger left,
-    @NonNull final BigInteger right
-  ) { return left.add(right); }
+  public ByteSelectionToExpressionCompiler() {
+    super(Primitives.BYTE);
+  }
 
   @Override
-  protected @NonNull BigInteger subtract (
-    @NonNull final BigInteger left,
-    @NonNull final BigInteger right
-  ) { return left.subtract(right); }
-
-  @Override
-  protected @NonNull BigInteger parse (@NonNull final Token token) {
+  protected @NonNull Byte parse(@NonNull final Token token) {
     try {
-      return new BigInteger(token.getText().replaceFirst("\\.[0-9]+", ""));
+      return Byte.parseByte(token.getText().replaceFirst("\\.[0-9]+", ""));
     } catch (@NonNull final NumberFormatException exception) {
       throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
+          String.join("",
+              "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
+              String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
+          ),
+          exception
       );
     }
+  }
+
+  @Override
+  protected @NonNull Byte add(
+      @NonNull final Byte left,
+      @NonNull final Byte right
+  ) {
+    return (byte) (left + right);
+  }
+
+  @Override
+  protected @NonNull Byte subtract(
+      @NonNull final Byte left,
+      @NonNull final Byte right
+  ) {
+    return (byte) (left - right);
   }
 }

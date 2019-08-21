@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,37 +25,36 @@ package org.liara.selection;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TranspilationException
-  extends Error
-{
+    extends Error {
+
   @NonNull
   private final int _line;
 
   @NonNull
   private final int _character;
 
-  public TranspilationException (
-    final int line, final int character, @NonNull final String message
-  )
-  {
+  public TranspilationException(
+      final int line, final int character, @NonNull final String message
+  ) {
     super(message);
     _line = line;
     _character = character;
   }
 
-  public TranspilationException (
-    final int line, final int character, @NonNull final String message, @NonNull final Throwable cause
-  )
-  {
+  public TranspilationException(
+      final int line, final int character, @NonNull final String message,
+      @NonNull final Throwable cause
+  ) {
     super(message, cause);
     _line = line;
     _character = character;
   }
 
-  public int getLine () {
+  public int getLine() {
     return _line;
   }
 
-  public int getCharacter () {
+  public int getCharacter() {
     return _character;
   }
 }

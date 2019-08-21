@@ -3,6 +3,7 @@ grammar BooleanSelection;
 NOT: 'not:';
 TRUE: 'true' | 'TRUE' | '1';
 FALSE: 'false' | 'FALSE' | '0';
+NULL: 'null' | 'NULL';
 EQUAL: 'eq:';
 
 selection: filter (';' filter)* EOF;
@@ -15,7 +16,6 @@ clause: operation
 
 negation: NOT operation;
 
-operation: target=(TRUE | FALSE)
-         | name=EQUAL target=(TRUE | FALSE)
-         | name=LESS_THAN_OR_EQUAL target=NUMBER
+operation: target=(TRUE | FALSE | NULL)
+         | name=EQUAL target=(TRUE | FALSE | NULL)
          ;

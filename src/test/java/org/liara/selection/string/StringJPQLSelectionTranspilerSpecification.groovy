@@ -30,7 +30,7 @@ class StringJPQLSelectionTranspilerSpecification
 {
   def "it can transpile keywords clauses" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile a keyword clause expression"
     final JPQLQuery result = transpiler.transpile("jean jacques  louis\n\rmarc   \npaul,valère")
@@ -58,7 +58,7 @@ class StringJPQLSelectionTranspilerSpecification
 
   def "it can transpile regular expression clauses" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile a regular expression"
     final JPQLQuery result = transpiler.transpile("/ab\\/c?/")
@@ -70,7 +70,7 @@ class StringJPQLSelectionTranspilerSpecification
 
   def "it can transpile equal clauses" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile an equal clause"
     final JPQLQuery result = transpiler.transpile("eq:not:not:eq:pouet")
@@ -82,7 +82,7 @@ class StringJPQLSelectionTranspilerSpecification
 
   def "it can transpile exact match clauses" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile an exact match clause"
     final JPQLQuery result = transpiler.transpile("\"an exact \\\"match\\\", expression\"")
@@ -94,7 +94,7 @@ class StringJPQLSelectionTranspilerSpecification
 
   def "it can transpile negation of clauses" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile negation of clauses"
     final JPQLQuery result = transpiler.transpile("not:paul,not:\"pl an\",not:/regexp/")
@@ -116,7 +116,7 @@ class StringJPQLSelectionTranspilerSpecification
 
   def "it can transpile conjunction of clauses" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile a conjunction of clauses"
     final JPQLQuery result = transpiler.transpile("paul \"pl an\",/regexp/ not:abc")
@@ -139,7 +139,7 @@ class StringJPQLSelectionTranspilerSpecification
 
   def "it can transpile disjunction of filters" () {
     given: "a transpiler"
-    final StringJPQLSelectionTranspiler transpiler = new StringJPQLSelectionTranspiler()
+    final StringSelectionToExpressionCompiler transpiler = new StringSelectionToExpressionCompiler()
 
     when: "we transpile a disjunction of filters"
     final JPQLQuery result = transpiler.transpile("paul;/regexp/ not:abc")

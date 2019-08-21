@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,15 +22,14 @@
 
 package org.liara.selection.processor;
 
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ProcessorCall
-{
+public class ProcessorCall {
+
   @NonNull
   private final List<@NonNull Object> _configurationParameters;
 
@@ -40,63 +39,60 @@ public class ProcessorCall
   @NonNull
   private final String[] _identifier;
 
-  public ProcessorCall (
-    @NonNull final String identifier,
-    @NonNull final List<@NonNull Object> configurationParameters,
-    @NonNull final List<@NonNull Object> executionParameters
-  )
-  {
+  public ProcessorCall(
+      @NonNull final String identifier,
+      @NonNull final List<@NonNull Object> configurationParameters,
+      @NonNull final List<@NonNull Object> executionParameters
+  ) {
     _identifier = identifier.split("\\.");
     _configurationParameters = configurationParameters;
     _executionParameters = executionParameters;
   }
 
-  public ProcessorCall (
-    @NonNull final String[] identifier,
-    @NonNull final List<@NonNull Object> configurationParameters,
-    @NonNull final List<@NonNull Object> executionParameters
-  )
-  {
+  public ProcessorCall(
+      @NonNull final String[] identifier,
+      @NonNull final List<@NonNull Object> configurationParameters,
+      @NonNull final List<@NonNull Object> executionParameters
+  ) {
     _identifier = Arrays.copyOf(identifier, identifier.length);
     _configurationParameters = configurationParameters;
     _executionParameters = executionParameters;
   }
 
-  public ProcessorCall (
-    @NonNull final String[] identifier, @NonNull final ProcessorCall toCopy
-  )
-  {
+  public ProcessorCall(
+      @NonNull final String[] identifier, @NonNull final ProcessorCall toCopy
+  ) {
     _identifier = Arrays.copyOf(identifier, identifier.length);
     _configurationParameters = toCopy.getConfigurationParameters();
     _executionParameters = toCopy.getExecutionParameters();
   }
 
-  public <Result> @NonNull Result call (@NonNull final Processor<Result> processor) {
+  public <Result> @NonNull Result call(@NonNull final Processor<Result> processor) {
     processor.configure(_configurationParameters);
     return processor.execute(_executionParameters);
   }
 
-  public @NonNull String[] getIdentifier () {
+  public @NonNull String[] getIdentifier() {
     return Arrays.copyOf(_identifier, _identifier.length);
   }
 
-  public @NonNull String getFullIdentifier () {
+  public @NonNull String getFullIdentifier() {
     return String.join(".", _identifier);
   }
 
-  public @NonNull String getIdentifier (@NonNegative final int index) {
+  public @NonNull String getIdentifier(@NonNegative final int index) {
     return _identifier[index];
   }
 
-  public @NonNull ProcessorCall next () {
+  public @NonNull ProcessorCall next() {
     return new ProcessorCall(Arrays.copyOfRange(_identifier, 1, _identifier.length), this);
   }
 
-  public @NonNull List<@NonNull Object> getConfigurationParameters () {
+  public @NonNull List<@NonNull Object> getConfigurationParameters() {
     return Collections.unmodifiableList(_configurationParameters);
   }
 
-  public @NonNull List<@NonNull Object> getExecutionParameters () {
+  public @NonNull List<@NonNull Object> getExecutionParameters() {
     return Collections.unmodifiableList(_executionParameters);
   }
 }
