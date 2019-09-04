@@ -20,31 +20,47 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.liara.selection;
+package org.liara.test.selection.natural;
 
+import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.liara.expression.Expression;
+import org.liara.data.primitive.Primitives;
 
-public interface SelectionToExpressionCompiler<Result> {
+public class LongSelectionToExpressionCompiler
+    extends NumberSelectionToExpressionCompiler<Long> {
 
-  /**
-   * Compile the given boolean selection into an expression.
-   *
-   * @param selection A boolean selection.
-   * @return An expression built from the given selection.
-   */
-  @NonNull Expression<@NonNull Boolean> compile(@NonNull final CharSequence selection);
+  public LongSelectionToExpressionCompiler() {
+    super(Primitives.LONG);
+  }
 
-  /**
-   * Try to compile the given boolean selection into an expression and throws an error on any
-   * lexical or grammatical exception.
-   *
-   * @param selection A boolean selection.
-   * @return An expression built from the given selection.
-   * @throws CompilationException If any lexical or grammatical exception is spot by the lexer or
-   * the parser.
-   */
-  @NonNull Expression<@NonNull Boolean> tryToCompile(
-      @NonNull final CharSequence selection
-  ) throws CompilationException;
+  @Override
+  protected @NonNull Long parse(@NonNull final Token token) {
+    try {
+      return Long.parseLong(token.getText().replaceFirst("\\.[0-9]+", ""));
+    } catch (@NonNull final NumberFormatException exception) {
+      throw new Error(
+          String.join("",
+              "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
+              String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
+          ),
+          exception
+      );
+    }
+  }
+
+  @Override
+  protected @NonNull Long add(
+      @NonNull final Long left,
+      @NonNull final Long right
+  ) {
+    return left + right;
+  }
+
+  @Override
+  protected @NonNull Long subtract(
+      @NonNull final Long left,
+      @NonNull final Long right
+  ) {
+    return left - right;
+  }
 }

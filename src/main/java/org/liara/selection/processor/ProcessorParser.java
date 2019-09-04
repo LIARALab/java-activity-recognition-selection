@@ -29,8 +29,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.liara.selection.CompilationException;
 import org.liara.selection.ThrowingErrorListener;
-import org.liara.selection.TranspilationException;
 import org.liara.selection.antlr.ProcessorsBaseListener;
 import org.liara.selection.antlr.ProcessorsLexer;
 import org.liara.selection.antlr.ProcessorsParser;
@@ -102,7 +102,7 @@ public class ProcessorParser
   }
 
   public @NonNull ProcessorCall[] tryToTranspile(@NonNull final CharSequence expression)
-      throws TranspilationException {
+      throws CompilationException {
     @NonNull final ProcessorsLexer lexer = new ProcessorsLexer(
         CharStreams.fromString(expression.toString()));
     lexer.addErrorListener(ThrowingErrorListener.INSTANCE);

@@ -42,8 +42,8 @@ public class ThrowingErrorListener
       @NonNull final String message,
       @NonNull final RecognitionException exception
   )
-      throws TranspilationException {
+      throws CompilationException {
     exception.printStackTrace();
-    throw new TranspilationException(line, charPositionInLine, message);
+    throw new CompilationException(line, charPositionInLine, message);
   }
 }

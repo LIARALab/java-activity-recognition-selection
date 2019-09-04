@@ -10,11 +10,11 @@ selection: filter (';' filter)* EOF;
 
 filter: clause (',' clause)*;
 
-clause: operation
-      | negation
+clause: negation
+      | operation
       ;
 
-negation: NOT operation;
+negation: NOT clause;
 
 operation: target=(TRUE | FALSE | NULL)
          | name=EQUAL target=(TRUE | FALSE | NULL)

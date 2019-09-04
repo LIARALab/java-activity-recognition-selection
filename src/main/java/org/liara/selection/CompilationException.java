@@ -23,28 +23,38 @@
 package org.liara.selection;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.liara.expression.Expression;
 
-public interface SelectionToExpressionCompiler<Result> {
+public class CompilationException
+    extends Error {
 
-  /**
-   * Compile the given boolean selection into an expression.
-   *
-   * @param selection A boolean selection.
-   * @return An expression built from the given selection.
-   */
-  @NonNull Expression<@NonNull Boolean> compile(@NonNull final CharSequence selection);
+  @NonNull
+  private final int _line;
 
-  /**
-   * Try to compile the given boolean selection into an expression and throws an error on any
-   * lexical or grammatical exception.
-   *
-   * @param selection A boolean selection.
-   * @return An expression built from the given selection.
-   * @throws CompilationException If any lexical or grammatical exception is spot by the lexer or
-   * the parser.
-   */
-  @NonNull Expression<@NonNull Boolean> tryToCompile(
-      @NonNull final CharSequence selection
-  ) throws CompilationException;
+  @NonNull
+  private final int _character;
+
+  public CompilationException(
+      final int line, final int character, @NonNull final String message
+  ) {
+    super(message);
+    _line = line;
+    _character = character;
+  }
+
+  public CompilationException(
+      final int line, final int character, @NonNull final String message,
+      @NonNull final Throwable cause
+  ) {
+    super(message, cause);
+    _line = line;
+    _character = character;
+  }
+
+  public int getLine() {
+    return _line;
+  }
+
+  public int getCharacter() {
+    return _character;
+  }
 }

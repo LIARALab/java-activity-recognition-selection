@@ -23,61 +23,61 @@
 package org.liara.selection;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.liara.selection.bool.BooleanSelectionToExpressionCompiler;
-import org.liara.selection.datetime.DateTimeInRangeJPQLSelectionTranspiler;
-import org.liara.selection.datetime.DateTimeJPQLSelectionTranspiler;
-import org.liara.selection.duration.DurationSelectionToExpressionCompiler;
-import org.liara.selection.natural.ByteSelectionToExpressionCompiler;
-import org.liara.selection.natural.DoubleSelectionToExpressionCompiler;
-import org.liara.selection.natural.FloatSelectionToExpressionCompiler;
-import org.liara.selection.natural.IntegerSelectionToExpressionCompiler;
-import org.liara.selection.natural.LongSelectionToExpressionCompiler;
-import org.liara.selection.natural.ShortSelectionToExpressionCompiler;
-import org.liara.selection.string.StringSelectionToExpressionCompiler;
+import org.liara.test.selection.bool.BooleanSelectionToExpressionCompiler;
+import org.liara.test.selection.datetime.DateTimeInRangeSelectionToExpressionCompiler;
+import org.liara.test.selection.datetime.DateTimeSelectionToExpressionCompiler;
+import org.liara.test.selection.duration.DurationSelectionToExpressionCompiler;
+import org.liara.test.selection.natural.ByteSelectionToExpressionCompiler;
+import org.liara.test.selection.natural.DoubleSelectionToExpressionCompiler;
+import org.liara.test.selection.natural.FloatSelectionToExpressionCompiler;
+import org.liara.test.selection.natural.IntegerSelectionToExpressionCompiler;
+import org.liara.test.selection.natural.LongSelectionToExpressionCompiler;
+import org.liara.test.selection.natural.ShortSelectionToExpressionCompiler;
+import org.liara.test.selection.string.StringSelectionToExpressionCompiler;
 
 public final class SelectionToExpressionCompilers {
 
-  public static @NonNull SelectionToExpressionCompiler integerTranspiler() {
+  public static @NonNull IntegerSelectionToExpressionCompiler integerTranspiler() {
     return new IntegerSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler longTranspiler() {
+  public static @NonNull LongSelectionToExpressionCompiler longTranspiler() {
     return new LongSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler shortTranspiler() {
+  public static @NonNull ShortSelectionToExpressionCompiler shortTranspiler() {
     return new ShortSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler byteTranspiler() {
+  public static @NonNull ByteSelectionToExpressionCompiler byteTranspiler() {
     return new ByteSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler floatTranspiler() {
+  public static @NonNull FloatSelectionToExpressionCompiler floatTranspiler() {
     return new FloatSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler doubleTranspiler() {
+  public static @NonNull DoubleSelectionToExpressionCompiler doubleTranspiler() {
     return new DoubleSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler stringTranspiler() {
+  public static @NonNull StringSelectionToExpressionCompiler stringTranspiler() {
     return new StringSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler durationTranspiler() {
+  public static @NonNull DurationSelectionToExpressionCompiler durationTranspiler() {
     return new DurationSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler datetimeTranspiler() {
-    return new DateTimeJPQLSelectionTranspiler();
+  public static @NonNull DateTimeSelectionToExpressionCompiler datetimeTranspiler() {
+    return new DateTimeSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler getBoolean() {
+  public static @NonNull BooleanSelectionToExpressionCompiler getBoolean() {
     return new BooleanSelectionToExpressionCompiler();
   }
 
-  public static @NonNull SelectionToExpressionCompiler datetimeInRangeTranspiler() {
-    return new DateTimeInRangeJPQLSelectionTranspiler();
+  public static @NonNull DateTimeInRangeSelectionToExpressionCompiler datetimeInRangeTranspiler() {
+    return new DateTimeInRangeSelectionToExpressionCompiler();
   }
 }
