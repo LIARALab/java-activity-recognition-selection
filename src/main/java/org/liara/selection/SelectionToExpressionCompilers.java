@@ -37,47 +37,47 @@ import org.liara.test.selection.string.StringSelectionToExpressionCompiler;
 
 public final class SelectionToExpressionCompilers {
 
-  public static @NonNull IntegerSelectionToExpressionCompiler integerTranspiler() {
+  public static @NonNull IntegerSelectionToExpressionCompiler createIntegerCompiler() {
     return new IntegerSelectionToExpressionCompiler();
   }
 
-  public static @NonNull LongSelectionToExpressionCompiler longTranspiler() {
+  public static @NonNull LongSelectionToExpressionCompiler createLongCompiler() {
     return new LongSelectionToExpressionCompiler();
   }
 
-  public static @NonNull ShortSelectionToExpressionCompiler shortTranspiler() {
+  public static @NonNull ShortSelectionToExpressionCompiler createShortCompiler() {
     return new ShortSelectionToExpressionCompiler();
   }
 
-  public static @NonNull ByteSelectionToExpressionCompiler byteTranspiler() {
+  public static @NonNull ByteSelectionToExpressionCompiler createByteCompiler() {
     return new ByteSelectionToExpressionCompiler();
   }
 
-  public static @NonNull FloatSelectionToExpressionCompiler floatTranspiler() {
+  public static @NonNull FloatSelectionToExpressionCompiler createFloatCompiler() {
     return new FloatSelectionToExpressionCompiler();
   }
 
-  public static @NonNull DoubleSelectionToExpressionCompiler doubleTranspiler() {
+  public static @NonNull DoubleSelectionToExpressionCompiler createDoubleCompiler() {
     return new DoubleSelectionToExpressionCompiler();
   }
 
-  public static @NonNull StringSelectionToExpressionCompiler stringTranspiler() {
+  public static @NonNull StringSelectionToExpressionCompiler createStringCompiler() {
     return new StringSelectionToExpressionCompiler();
   }
 
-  public static @NonNull DurationSelectionToExpressionCompiler durationTranspiler() {
+  public static @NonNull DurationSelectionToExpressionCompiler createDurationCompiler() {
     return new DurationSelectionToExpressionCompiler();
   }
 
-  public static @NonNull DateTimeSelectionToExpressionCompiler datetimeTranspiler() {
+  public static @NonNull DateTimeSelectionToExpressionCompiler createDatetimeCompiler() {
     return new DateTimeSelectionToExpressionCompiler();
   }
 
-  public static @NonNull BooleanSelectionToExpressionCompiler getBoolean() {
+  public static @NonNull BooleanSelectionToExpressionCompiler createBooleanCompiler() {
     return new BooleanSelectionToExpressionCompiler();
   }
 
-  public static @NonNull DateTimeInRangeSelectionToExpressionCompiler datetimeInRangeTranspiler() {
+  public static @NonNull DateTimeInRangeSelectionToExpressionCompiler createDatetimeInRangeCompiler() {
     return new DateTimeInRangeSelectionToExpressionCompiler();
   }
 }
