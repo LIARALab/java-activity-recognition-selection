@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,40 +20,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.liara.selection.natural;
+package org.liara.selection;
 
-import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.math.BigDecimal;
+public class CompilationException
+    extends Error {
 
-public class BigDecimalJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<BigDecimal>
-{
-  @Override
-  protected @NonNull BigDecimal parse (@NonNull final Token token) {
-    try {
-      return new BigDecimal(token.getText());
-    } catch (@NonNull final NumberFormatException exception) {
-      throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
-      );
-    }
+  @NonNull
+  private final int _line;
+
+  @NonNull
+  private final int _character;
+
+  public CompilationException(
+      final int line, final int character, @NonNull final String message
+  ) {
+    super(message);
+    _line = line;
+    _character = character;
   }
 
-  @Override
-  protected @NonNull BigDecimal add (
-    @NonNull final BigDecimal left,
-    @NonNull final BigDecimal right
-  ) { return left.add(right); }
+  public CompilationException(
+      final int line, final int character, @NonNull final String message,
+      @NonNull final Throwable cause
+  ) {
+    super(message, cause);
+    _line = line;
+    _character = character;
+  }
 
-  @Override
-  protected @NonNull BigDecimal subtract (
-    @NonNull final BigDecimal left,
-    @NonNull final BigDecimal right
-  ) { return left.subtract(right); }
+  public int getLine() {
+    return _line;
+  }
+
+  public int getCharacter() {
+    return _character;
+  }
 }

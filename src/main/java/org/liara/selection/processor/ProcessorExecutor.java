@@ -22,27 +22,30 @@
 
 package org.liara.selection.processor;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-import java.util.*;
+import com.google.common.collect.Iterators;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @FunctionalInterface
-public interface ProcessorExecutor<Result>
-{
-  static <Result> @NonNull ProcessorExecutor<Result> execute (
-    @NonNull final Processor<Result> processor
-  )
-  {
+public interface ProcessorExecutor<Result> {
+
+  static <Result> @NonNull ProcessorExecutor<Result> execute(
+      @NonNull final Processor<Result> processor
+  ) {
     return (@NonNull final ProcessorCall call) -> Optional.of(call.call(processor));
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> executeIf (
-    @NonNull final ProcessorExecutor<Result> processor,
-    @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
-  )
-  {
+  static <Result> @NonNull ProcessorExecutor<Result> executeIf(
+      @NonNull final ProcessorExecutor<Result> processor,
+      @NonNull final Function<@NonNull ProcessorCall, @NonNull Boolean> condition
+  ) {
     return (@NonNull final ProcessorCall call) -> {
       if (condition.apply(call)) {
         return processor.execute(call);
@@ -52,16 +55,15 @@ public interface ProcessorExecutor<Result>
     };
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> factory (
-    @NonNull final Supplier<ProcessorExecutor<Result>> supplier
+  static <Result> @NonNull ProcessorExecutor<Result> factory(
+      @NonNull final Supplier<ProcessorExecutor<Result>> supplier
   ) {
     return (@NonNull final ProcessorCall call) -> supplier.get().execute(call);
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> field (
-    @NonNull final String field, @NonNull final ProcessorExecutor<Result> processor
-  )
-  {
+  static <Result> @NonNull ProcessorExecutor<Result> field(
+      @NonNull final String field, @NonNull final ProcessorExecutor<Result> processor
+  ) {
     return (@NonNull final ProcessorCall call) -> {
       if (field.equals(call.getIdentifier(0))) {
         return processor.execute(call.next());
@@ -71,11 +73,11 @@ public interface ProcessorExecutor<Result>
     };
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> fields (
-    @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> bindings
-  )
-  {
-    @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> copy = new HashMap<>(bindings);
+  static <Result> @NonNull ProcessorExecutor<Result> fields(
+      @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> bindings
+  ) {
+    @NonNull final Map<@NonNull String, @NonNull ProcessorExecutor<Result>> copy = new HashMap<>(
+        bindings);
 
     return (@NonNull final ProcessorCall call) -> {
       if (copy.containsKey(call.getIdentifier(0))) {
@@ -86,31 +88,53 @@ public interface ProcessorExecutor<Result>
     };
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> all (
-    @NonNull final ProcessorExecutor<Result>... processors
-  )
-  {
+  static <Result> @NonNull ProcessorExecutor<Result> all(
+      @NonNull final ProcessorExecutor<Result>... processors
+  ) {
     return all(Arrays.asList(processors));
   }
 
-  static <Result> @NonNull ProcessorExecutor<Result> all (
-    @NonNull final List<@NonNull ProcessorExecutor<Result>> processors
-  )
-  {
+  static <Result> @NonNull ProcessorExecutor<Result> all(
+      @NonNull final List<@NonNull ProcessorExecutor<Result>> processors
+  ) {
     @NonNull final List<@NonNull ProcessorExecutor<Result>> copy = new ArrayList<>(processors);
 
     return (@NonNull final ProcessorCall call) -> {
       for (@NonNull final ProcessorExecutor<Result> executor : copy) {
         @NonNull final Optional<Result> result = executor.execute(call);
 
-        if (result.isPresent()) return result;
+        if (result.isPresent()) {
+          return result;
+        }
       }
 
       return Optional.empty();
     };
   }
 
-  default <Next> @NonNull ProcessorExecutor<Next> mapNonNull (@NonNull final Function<Result, Next> mapper) {
+  static <Result> @NonNull ProcessorExecutor<Result> all(
+      @NonNull final Iterable<@NonNull ProcessorExecutor<Result>> processors
+  ) {
+    @NonNull final List<@NonNull ProcessorExecutor<Result>> copy = new ArrayList<>(
+        Iterators.size(processors.iterator())
+    );
+    processors.iterator().forEachRemaining(copy::add);
+
+    return (@NonNull final ProcessorCall call) -> {
+      for (@NonNull final ProcessorExecutor<Result> executor : copy) {
+        @NonNull final Optional<Result> result = executor.execute(call);
+
+        if (result.isPresent()) {
+          return result;
+        }
+      }
+
+      return Optional.empty();
+    };
+  }
+
+  default <Next> @NonNull ProcessorExecutor<Next> mapNonNull(
+      @NonNull final Function<Result, Next> mapper) {
     return (@NonNull final ProcessorCall call) -> {
       @NonNull final Optional<Result> result = execute(call);
 
@@ -122,7 +146,7 @@ public interface ProcessorExecutor<Result>
     };
   }
 
-  default @NonNull List<@NonNull Result> execute (@NonNull final ProcessorCall... calls) {
+  default @NonNull List<@NonNull Result> execute(@NonNull final ProcessorCall... calls) {
     @NonNull final List<@NonNull Result> results = new ArrayList<>();
 
     for (@NonNull final ProcessorCall call : calls) {
@@ -132,7 +156,7 @@ public interface ProcessorExecutor<Result>
     return results;
   }
 
-  default @NonNull List<@NonNull Result> execute (@NonNull final Iterable<ProcessorCall> calls) {
+  default @NonNull List<@NonNull Result> execute(@NonNull final Iterable<ProcessorCall> calls) {
     @NonNull final List<@NonNull Result> results = new ArrayList<>();
 
     for (@NonNull final ProcessorCall call : calls) {
@@ -142,5 +166,5 @@ public interface ProcessorExecutor<Result>
     return results;
   }
 
-  @NonNull Optional<Result> execute (@NonNull final ProcessorCall call);
+  @NonNull Optional<Result> execute(@NonNull final ProcessorCall call);
 }

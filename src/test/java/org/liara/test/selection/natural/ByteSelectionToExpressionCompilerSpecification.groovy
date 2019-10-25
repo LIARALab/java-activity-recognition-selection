@@ -26,49 +26,48 @@ import org.liara.expression.ExpressionFactory
 import spock.lang.Specification
 
 class ByteSelectionToExpressionCompilerSpecification
-        extends Specification {
-    def "it can parse byte values"() {
-        given: "a compiler"
-        final ByteSelectionToExpressionCompiler compiler = new ByteSelectionToExpressionCompiler()
+  extends Specification {
+  def "it can parse byte values" () {
+      given: "a compiler"
+      final ByteSelectionToExpressionCompiler compiler = new ByteSelectionToExpressionCompiler()
 
-        and: "an expression factory"
-        final ExpressionFactory factory = new ExpressionFactory()
+      and: "an expression factory"
+      final ExpressionFactory factory = new ExpressionFactory()
 
-        expect: "it to be able to parse byte values"
-        compiler.compile("gt:5.689") == factory.greaterThan(
-                compiler.getFilteredValue(),
-                factory.nonnull((byte) 5)
-        )
+    expect: "it to be able to parse byte values"
+    compiler.compile("gt:5.689") == factory.greaterThan(
+            compiler.getFilteredValue(),
+            factory.nonnull((byte) 5)
+    )
 
-        compiler.compile("gt:-107.487") == factory.greaterThan(
-                compiler.getFilteredValue(),
-                factory.nonnull((byte) -107)
-        )
-    }
+    compiler.compile("gt:-107.487") == factory.greaterThan(
+            compiler.getFilteredValue(),
+            factory.nonnull((byte) -107)
+    )
+  }
+  def "it can add and subtract byte values" () {
+      given: "a compiler"
+      final ByteSelectionToExpressionCompiler compiler = new ByteSelectionToExpressionCompiler()
 
-    def "it can add and subtract byte values"() {
-        given: "a compiler"
-        final ByteSelectionToExpressionCompiler compiler = new ByteSelectionToExpressionCompiler()
+      and: "an expression factory"
+      final ExpressionFactory factory = new ExpressionFactory()
 
-        and: "an expression factory"
-        final ExpressionFactory factory = new ExpressionFactory()
+    expect: "it to be able to add and subtract byte values"
+    compiler.compile("near:5.56+-3.15") == factory.between(
+            compiler.getFilteredValue(),
+            factory.nonnull((byte) 2),
+            factory.nonnull((byte) 8)
+    )
+  }
 
-        expect: "it to be able to add and subtract byte values"
-        compiler.compile("near:5.56+-3.15") == factory.between(
-                compiler.getFilteredValue(),
-                factory.nonnull((byte) 2),
-                factory.nonnull((byte) 8)
-        )
-    }
+  def "it throw an error if the value is out of range" () {
+      given: "a compiler"
+      final ByteSelectionToExpressionCompiler compiler = new ByteSelectionToExpressionCompiler()
 
-    def "it throw an error if the value is out of range"() {
-        given: "a compiler"
-        final ByteSelectionToExpressionCompiler compiler = new ByteSelectionToExpressionCompiler()
+    when: "we try to parse a value out of range"
+    compiler.compile("gt:5487965.689")
 
-        when: "we try to parse a value out of range"
-        compiler.compile("gt:5487965.689")
-
-        then: "we expect the compiler to throw an error"
-        thrown(Error)
-    }
+      then: "we expect the compiler to throw an error"
+    thrown(Error)
+  }
 }

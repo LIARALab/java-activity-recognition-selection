@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,38 +20,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.liara.selection.natural;
+package org.liara.selection;
 
-import org.antlr.v4.runtime.Token;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.liara.expression.Expression;
 
-public class   IntegerJPQLSelectionTranspiler
-  extends NumberJPQLSelectionTranspiler<Integer>
-{
-  @Override
-  protected @NonNull Integer add (
-    @NonNull final Integer left,
-    @NonNull final Integer right
-  ) { return left + right; }
+public interface SelectionToExpressionCompiler<Result> {
 
-  @Override
-  protected @NonNull Integer subtract (
-    @NonNull final Integer left,
-    @NonNull final Integer right
-  ) { return left - right; }
+  /**
+   * Compile the given boolean selection into an expression.
+   *
+   * @param selection A boolean selection.
+   * @return An expression built from the given selection.
+   */
+  @NonNull Expression<@NonNull Boolean> compile(@NonNull final CharSequence selection);
 
-  @Override
-  protected @NonNull Integer parse (@NonNull final Token token) {
-    try {
-      return Integer.parseInt(token.getText().replaceFirst("\\.[0-9]+", ""));
-    } catch (@NonNull final NumberFormatException exception) {
-      throw new Error(
-        String.join("",
-                    "Invalid number format at line ", String.valueOf(token.getLine()), " and index ",
-                    String.valueOf(token.getCharPositionInLine()), " : \"", token.getText(), "\""
-        ),
-        exception
-      );
-    }
-  }
+  /**
+   * Try to compile the given boolean selection into an expression and throws an error on any
+   * lexical or grammatical exception.
+   *
+   * @param selection A boolean selection.
+   * @return An expression built from the given selection.
+   * @throws CompilationException If any lexical or grammatical exception is spot by the lexer or
+   * the parser.
+   */
+  @NonNull Expression<@NonNull Boolean> tryToCompile(
+      @NonNull final CharSequence selection
+  ) throws CompilationException;
 }

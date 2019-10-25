@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
+ * Copyright (C) 2019 Cedric DEMONGIVERT <cedric.demongivert@gmail.com>
  *
  * Permission is hereby granted,  free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,51 +22,54 @@
 
 package org.liara.selection.processor;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.liara.selection.CompilationException;
 import org.liara.selection.ThrowingErrorListener;
-import org.liara.selection.TranspilationException;
 import org.liara.selection.antlr.ProcessorsBaseListener;
 import org.liara.selection.antlr.ProcessorsLexer;
 import org.liara.selection.antlr.ProcessorsParser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ProcessorParser
-  extends ProcessorsBaseListener
-{
+    extends ProcessorsBaseListener {
+
   @NonNull
   private final List<ProcessorCall> _result;
 
-  public ProcessorParser () {
+  public ProcessorParser() {
     _result = new ArrayList<>();
   }
 
   @Override
-  public void enterProcessors (final ProcessorsParser.@NonNull ProcessorsContext context) {
+  public void enterProcessors(final ProcessorsParser.@NonNull ProcessorsContext context) {
     _result.clear();
   }
 
   @Override
-  public void exitProcessor (final ProcessorsParser.@NonNull ProcessorContext context) {
-    @NonNull final List<Object> configurationParameters = parseParameters(context.configurationParameters);
-    @NonNull final List<Object> executionParameters     = parseParameters(context.executionParameters);
+  public void exitProcessor(final ProcessorsParser.@NonNull ProcessorContext context) {
+    @NonNull final List<Object> configurationParameters = parseParameters(
+        context.configurationParameters);
+    @NonNull final List<Object> executionParameters = parseParameters(context.executionParameters);
 
-    _result.add(new ProcessorCall(context.identifier().getText(), configurationParameters, executionParameters));
+    _result.add(new ProcessorCall(context.identifier().getText(), configurationParameters,
+        executionParameters));
   }
 
-  private @NonNull List<@NonNull Object> parseParameters (
-    final ProcessorsParser.@Nullable ParametersContext configurationParameters
-  )
-  {
-    if (configurationParameters == null) return new ArrayList<>(0);
+  private @NonNull List<@NonNull Object> parseParameters(
+      final ProcessorsParser.@Nullable ParametersContext configurationParameters
+  ) {
+    if (configurationParameters == null) {
+      return new ArrayList<>(0);
+    }
 
-    @NonNull final List<ProcessorsParser.@NonNull ParameterContext> contexts   = configurationParameters.parameter();
-    @NonNull final List<@NonNull Object>                            parameters = new ArrayList<>(contexts.size());
+    @NonNull final List<ProcessorsParser.@NonNull ParameterContext> contexts = configurationParameters
+        .parameter();
+    @NonNull final List<@NonNull Object> parameters = new ArrayList<>(contexts.size());
 
     for (final ProcessorsParser.@NonNull ParameterContext context : contexts) {
       parameters.add(parseParameter(context));
@@ -75,7 +78,7 @@ public class ProcessorParser
     return parameters;
   }
 
-  private @NonNull Object parseParameter (final ProcessorsParser.@NonNull ParameterContext context) {
+  private @NonNull Object parseParameter(final ProcessorsParser.@NonNull ParameterContext context) {
     if (context.integerParameter() != null) {
       return Long.parseLong(context.integerParameter().getText());
     } else if (context.doubleParameter() != null) {
@@ -88,8 +91,9 @@ public class ProcessorParser
     }
   }
 
-  public @NonNull ProcessorCall[] transpile (@NonNull final CharSequence expression) {
-    @NonNull final ProcessorsLexer  lexer  = new ProcessorsLexer(CharStreams.fromString(expression.toString()));
+  public @NonNull ProcessorCall[] transpile(@NonNull final CharSequence expression) {
+    @NonNull final ProcessorsLexer lexer = new ProcessorsLexer(
+        CharStreams.fromString(expression.toString()));
     @NonNull final ProcessorsParser parser = new ProcessorsParser(new CommonTokenStream(lexer));
 
     ParseTreeWalker.DEFAULT.walk(this, parser.processors());
@@ -97,10 +101,10 @@ public class ProcessorParser
     return _result.toArray(new ProcessorCall[0]);
   }
 
-  public @NonNull ProcessorCall[] tryToTranspile (@NonNull final CharSequence expression)
-  throws TranspilationException
-  {
-    @NonNull final ProcessorsLexer lexer = new ProcessorsLexer(CharStreams.fromString(expression.toString()));
+  public @NonNull ProcessorCall[] tryToTranspile(@NonNull final CharSequence expression)
+      throws CompilationException {
+    @NonNull final ProcessorsLexer lexer = new ProcessorsLexer(
+        CharStreams.fromString(expression.toString()));
     lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
     @NonNull final ProcessorsParser parser = new ProcessorsParser(new CommonTokenStream(lexer));
     parser.addErrorListener(ThrowingErrorListener.INSTANCE);

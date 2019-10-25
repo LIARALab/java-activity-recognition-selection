@@ -28,23 +28,22 @@ import org.antlr.v4.runtime.Recognizer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ThrowingErrorListener
-  extends BaseErrorListener
-{
+    extends BaseErrorListener {
+
   @NonNull
   public static final ThrowingErrorListener INSTANCE = new ThrowingErrorListener();
 
   @Override
-  public void syntaxError (
-    @NonNull final Recognizer<?, ?> recognizer,
-    @NonNull final Object offendingSymbol,
-    final int line,
-    final int charPositionInLine,
-    @NonNull final String message,
-    @NonNull final RecognitionException exception
+  public void syntaxError(
+      @NonNull final Recognizer<?, ?> recognizer,
+      @NonNull final Object offendingSymbol,
+      final int line,
+      final int charPositionInLine,
+      @NonNull final String message,
+      @NonNull final RecognitionException exception
   )
-  throws TranspilationException
-  {
+      throws CompilationException {
     exception.printStackTrace();
-    throw new TranspilationException(line, charPositionInLine, message);
+    throw new CompilationException(line, charPositionInLine, message);
   }
 }
