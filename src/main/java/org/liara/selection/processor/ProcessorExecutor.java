@@ -22,6 +22,7 @@
 
 package org.liara.selection.processor;
 
+import com.google.common.collect.Iterators;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -97,6 +98,27 @@ public interface ProcessorExecutor<Result> {
       @NonNull final List<@NonNull ProcessorExecutor<Result>> processors
   ) {
     @NonNull final List<@NonNull ProcessorExecutor<Result>> copy = new ArrayList<>(processors);
+
+    return (@NonNull final ProcessorCall call) -> {
+      for (@NonNull final ProcessorExecutor<Result> executor : copy) {
+        @NonNull final Optional<Result> result = executor.execute(call);
+
+        if (result.isPresent()) {
+          return result;
+        }
+      }
+
+      return Optional.empty();
+    };
+  }
+
+  static <Result> @NonNull ProcessorExecutor<Result> all(
+      @NonNull final Iterable<@NonNull ProcessorExecutor<Result>> processors
+  ) {
+    @NonNull final List<@NonNull ProcessorExecutor<Result>> copy = new ArrayList<>(
+        Iterators.size(processors.iterator())
+    );
+    processors.iterator().forEachRemaining(copy::add);
 
     return (@NonNull final ProcessorCall call) -> {
       for (@NonNull final ProcessorExecutor<Result> executor : copy) {
